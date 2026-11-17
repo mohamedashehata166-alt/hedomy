@@ -243,17 +243,17 @@ const GITHUB_TOKEN = "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";
 let products = [];
 let fileSha = ""; 
 
-// جلب البيانات بطريقة مباشرة وصحيحة من جيت هب
+// جلب البيانات بشكل مباشر وآمن من ملف products.json الموجود في نفس المستودع
 async function loadProducts() {
   try {
-    const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${GITHUB_FILE}?t=${Date.now()}`;
+    const url = `products.json?t=${Date.now()}`;
     const res = await fetch(url);
     
     if (!res.ok) throw new Error("فشل تحميل البيانات");
     
     products = await res.json();
     
-    // للحصول على الـ SHA الخاص بملف الـ JSON للتعديل لاحقاً عند الحفظ
+    // جلب الـ SHA الخاص بملف الـ JSON لاستخدامه عند الحفظ والتعديل من لوحة التحكم
     try {
       const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
       const apiRes = await fetch(apiUrl, {
@@ -271,7 +271,7 @@ async function loadProducts() {
     renderProducts();
   } catch (err) {
     console.error(err);
-    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات. تأكد من اتصال الإنترنت أو صحة الملف.</p>`;
+    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات. تأكد من وجود ملف products.json بجانب index.html.</p>`;
   }
 }
 
