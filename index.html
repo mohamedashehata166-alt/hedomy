@@ -233,7 +233,7 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 <script>
 const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
 
-// === إعدادات جيت هب (استبدل "ضع_التوكن_هنا" بالتوكن الخاص بك) ===
+// === إعدادات جيت هب ===
 const GITHUB_OWNER = "mohamedashehata166-alt";
 const GITHUB_REPO = "hedomy";
 const GITHUB_FILE = "products.json";
@@ -243,27 +243,35 @@ const GITHUB_TOKEN = "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";
 let products = [];
 let fileSha = ""; 
 
-// جلب البيانات من جيت هب
+// جلب البيانات بطريقة مباشرة وصحيحة من جيت هب
 async function loadProducts() {
   try {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`;
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json"
+    const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${GITHUB_FILE}?t=${Date.now()}`;
+    const res = await fetch(url);
+    
+    if (!res.ok) throw new Error("فشل تحميل البيانات");
+    
+    products = await res.json();
+    
+    // للحصول على الـ SHA الخاص بملف الـ JSON للتعديل لاحقاً عند الحفظ
+    try {
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+      const apiRes = await fetch(apiUrl, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
+      if(apiRes.ok) {
+        const apiData = await apiRes.json();
+        fileSha = apiData.sha;
       }
-    });
-    
-    if (!res.ok) throw new Error("خطأ في جلب الملف");
-    
-    const data = await res.json();
-    fileSha = data.sha;
-    const decodedContent = decodeURIComponent(escape(atob(data.content)));
-    products = JSON.parse(decodedContent);
+    } catch(e) {}
+
     renderProducts();
   } catch (err) {
     console.error(err);
-    document.getElementById("products").innerHTML = `<p class="empty">حدث خطأ في تحميل البيانات. تأكد من وضع التوكن الصحيح.</p>`;
+    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات. تأكد من اتصال الإنترنت أو صحة الملف.</p>`;
   }
 }
 
