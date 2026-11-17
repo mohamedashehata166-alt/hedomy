@@ -1,0 +1,6 @@
+[
+  {"id":1,"name":"بنطلون جينز أزرق","shop":"Fashion Store","price":450,"image":"https://via.placeholder.com/400x300?text=Jeans"},
+  {"id":2,"name":"بنطلون جينز أزرق","shop":"Star Men","price":390,"image":"https://via.placeholder.com/400x300?text=Jeans"},
+  {"id":3,"name":"هودي أسود","shop":"Active Wear","price":520,"image":"https://via.placeholder.com/400x300?text=Hoodie"},
+  {"id":4,"name":"هودي أسود","shop":"Fashion House","price":460,"image":"https://via.placeholder.com/400x300?text=Hoodie"}
+]
