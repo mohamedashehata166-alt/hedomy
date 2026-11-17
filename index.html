@@ -237,45 +237,26 @@ const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
 const GITHUB_OWNER = "mohamedashehata166-alt";
 const GITHUB_REPO = "hedomy";
 const GITHUB_FILE = "products.json";
-const GITHUB_TOKEN = "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"; 
+const GITHUB_TOKEN = "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"; 
 // ===============================================================
 
 let products = [];
-let fileSha = ""; 
 
-// جلب البيانات بشكل مباشر وآمن من ملف products.json الموجود في نفس المستودع
+// جلب البيانات من ملف products.json مباشرة
 async function loadProducts() {
   try {
     const url = `products.json?t=${Date.now()}`;
     const res = await fetch(url);
-    
-    if (!res.ok) throw new Error("فشل تحميل البيانات");
-    
+    if (!res.ok) throw new Error("فشل التحميل");
     products = await res.json();
-    
-    // جلب الـ SHA الخاص بملف الـ JSON لاستخدامه عند الحفظ والتعديل من لوحة التحكم
-    try {
-      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-      const apiRes = await fetch(apiUrl, {
-        headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
-          "Accept": "application/vnd.github.v3+json"
-        }
-      });
-      if(apiRes.ok) {
-        const apiData = await apiRes.json();
-        fileSha = apiData.sha;
-      }
-    } catch(e) {}
-
     renderProducts();
   } catch (err) {
     console.error(err);
-    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات. تأكد من وجود ملف products.json بجانب index.html.</p>`;
+    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات.</p>`;
   }
 }
 
-// حفظ البيانات على جيت هب لتظهر للجميع
+// دالة حفظ محدثة ومباشرة لضمان عدم حدوث خطأ الـ SHA
 async function saveProductsToGitHub() {
   const submitBtn = document.getElementById("submitBtn");
   if(submitBtn) {
@@ -284,11 +265,25 @@ async function saveProductsToGitHub() {
   }
 
   try {
+    // 1. جلب الـ SHA المحدث حالياً من جيت هب أولاً
+    const getUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`;
+    const getRes = await fetch(getUrl, {
+      headers: {
+        "Authorization": `Bearer ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json"
+      }
+    });
+    
+    if (!getRes.ok) throw new Error("فشل جلب تفاصيل الملف من جيت هب");
+    const fileData = await getRes.json();
+    const currentSha = fileData.sha;
+
+    // 2. إرسال التحديث برفع البيانات الجديدة مع الـ SHA الصحيح
     const jsonString = JSON.stringify(products, null, 2);
     const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
 
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-    const res = await fetch(url, {
+    const putUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+    const putRes = await fetch(putUrl, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${GITHUB_TOKEN}`,
@@ -298,18 +293,16 @@ async function saveProductsToGitHub() {
       body: JSON.stringify({
         message: "تحديث المنتجات من لوحة التحكم",
         content: encodedContent,
-        sha: fileSha
+        sha: currentSha
       })
     });
 
-    if (!res.ok) throw new Error("فشل الحفظ");
+    if (!putRes.ok) throw new Error("فشل الحفظ في جيت هب");
     
-    const data = await res.json();
-    fileSha = data.content.sha;
     renderProducts();
     return true;
   } catch (err) {
-    alert("حدث خطأ أثناء الحفظ. تأكد من صحة التوكن.");
+    alert("حدث خطأ أثناء الحفظ. تأكد من صحة التوكن أو الاتصال بالإنترنت.");
     console.error(err);
     return false;
   } finally {
