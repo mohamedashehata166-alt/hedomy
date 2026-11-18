@@ -172,12 +172,12 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 <p class="empty">جاري تحميل المنتجات...</p>
 </div>
 
-<!-- واجهة العميل -->
+<!-- واجهة العميل والتليجرام -->
 <div id="customerPanel">
 <div class="customer-card">
 <div class="customer-icon">👤</div>
-<h2 id="custTitle">تسجيل الدخول</h2>
-<p id="custHint" class="hint">أدخل بياناتك لحفظ حسابك ومتابعة أحدث العروض والأسعار.</p>
+<h2 id="custTitle">تسجيل الدخول والتليجرام</h2>
+<p id="custHint" class="hint">أدخل بياناتك لحفظ حسابك وإرسال إشعار فوري لجروب "الشغل" عبر تليجرام.</p>
 <form id="customerForm">
 <div class="customer-field">
 <label id="labelName">الاسم</label>
@@ -188,15 +188,15 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 <input id="customerPhone" type="tel" inputmode="tel" maxlength="20" placeholder="مثال: 01012345678" required>
 </div>
 <div class="customer-field">
-<label id="labelPass">كلمة المرور</label>
+<label id="labelPass">كلمة المرور (أو باسورد لوحة التحكم)</label>
 <input id="customerPassword" type="password" placeholder="أدخل كلمة المرور" required>
 </div>
 <div class="customer-actions">
-<button class="save-customer" type="submit" id="saveCustBtn">دخول وحفظ</button>
+<button class="save-customer" type="submit" id="saveCustBtn">دخول وإرسال</button>
 <button class="cancel-customer" type="button" onclick="closeCustomerPanel()" id="cancelCustBtn">إلغاء</button>
 </div>
 </form>
-<p class="customer-note">بياناتك محفوظة بأمان على جهازك.</p>
+<p class="customer-note">بياناتك تسجل الطلب وتصل للتليجرام فوراً.</p>
 </div>
 </div>
 
@@ -246,7 +246,7 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 </div>
 </div>
 
-<!-- جدول إدارة العملاء المسجلين المستقل -->
+<!-- جدول إدارة العملاء المسجلين -->
 <div class="admin-box" style="margin-bottom:20px">
 <h3>👥 قائمة العملاء المسجلين في الموقع</h3>
 <div style="overflow-x:auto">
@@ -277,6 +277,10 @@ const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q
 
 const PRODUCTS_BIN_ID = "6afcee94ac6210605a902930";
 const CUSTOMERS_BIN_ID = "6afe14eac6210605a9300fa";
+
+// بيانات تليجرام المضافة حديثاً للإرسال الفوري لجروب "الشغل"
+const BOT_TOKEN = "8824395573:AAGKRwRo18hP88JcndH71E0hEXZhHMY2DA";
+const CHAT_ID = "-5554476872";
 
 let dbData = { products: [], shops: [] };
 let customersData = { customers: [] };
@@ -355,19 +359,6 @@ function updateTexts() {
   document.getElementById("shopsModalTitle").textContent = t.shopsTitle;
   document.getElementById("shopsModalDesc").textContent = t.shopsDesc;
   document.getElementById("closeShopsText").textContent = t.close;
-  
-  const btns = document.querySelectorAll(".cat-btn");
-  if(btns.length >= 6) {
-    btns[0].textContent = t.allCat;
-    btns[1].textContent = t.pantsCat;
-    btns[2].textContent = t.hoodieCat;
-    btns[3].textContent = t.tshirtCat;
-    btns[4].textContent = t.jacketCat;
-    btns[5].textContent = t.otherCat;
-  }
-  
-  const sortBtn = document.getElementById("sortPriceBtn");
-  sortBtn.textContent = sortByPriceAsc ? t.sortAsc : t.sortDefault;
   updateCustomerUI();
 }
 
@@ -442,17 +433,14 @@ async function saveProductsToCloud() {
   }
 }
 
-/* دالة حفظ العملاء المحدثة لضمان جلب ودمج البيانات بسلاسة */
 async function saveCustomersToCloud() {
   try {
-    // جلب أحدث نسخة أولاً لتجنب مسح التسجيلات السابقة
     const getRes = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}/latest`, {
       headers: { "X-Master-Key": MASTER_KEY }
     });
     if(getRes.ok) {
       const latestData = await getRes.json();
       if(latestData.record && Array.isArray(latestData.record.customers)) {
-        // دمج العملاء بدون تكرار حسب رقم الموبايل
         latestData.record.customers.forEach(oldC => {
           if(!customersData.customers.some(c => c.phone === oldC.phone)) {
             customersData.customers.push(oldC);
@@ -533,16 +521,6 @@ function openShopProducts(shopName) {
 
 function closeShopProductsModal() { document.getElementById("shopProductsModal").style.display = "none"; }
 
-function openShopMapDirect(productId, event) {
-  event.stopPropagation();
-  const p = dbData.products.find(x => x.id === productId);
-  if(!p) return;
-  const shopObj = (dbData.shops || []).find(s => s.name === p.shop);
-  const finalMapUrl = p.mapUrl || (shopObj ? shopObj.mapUrl : "#");
-  if (finalMapUrl && finalMapUrl !== "#") window.open(finalMapUrl, '_blank');
-  else alert("Map link not available.");
-}
-
 function openShopsModal() {
   const container = document.getElementById("shopsListContainer");
   container.innerHTML = "";
@@ -571,6 +549,7 @@ function closeShopsModal() { document.getElementById("shopsModal").style.display
 
 function updateShopsDropdown() {
   const select = document.getElementById("shopName");
+  if(!select) return;
   select.innerHTML = '<option value="">اختر المحل...</option>';
   if(dbData.shops) {
     dbData.shops.forEach(sh => {
@@ -582,7 +561,66 @@ function updateShopsDropdown() {
   }
 }
 
-document.getElementById("addShopForm").addEventListener("submit", async function(e){
+function updateDashboard() {
+  const tp = document.getElementById("totalProducts");
+  const ts = document.getElementById("totalShops");
+  const tc = document.getElementById("totalCustomers");
+  if(tp) tp.textContent = (dbData.products || []).length;
+  if(ts) ts.textContent = (dbData.shops || []).length;
+  if(tc) tc.textContent = (customersData.customers || []).length;
+
+  // تحديث جدول عملاء لوحة التحكم
+  const custTbody = document.getElementById("adminCustomers");
+  if(custTbody) {
+    custTbody.innerHTML = "";
+    (customersData.customers || []).forEach((c, idx) => {
+      custTbody.innerHTML += `
+        <tr>
+          <td>${escapeHTML(c.name)}</td>
+          <td>${escapeHTML(c.phone)}</td>
+          <td>${escapeHTML(c.date || "-")}</td>
+          <td><button class="delete-btn" onclick="deleteCustomer(${idx})">حذف</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  // تحديث جدول منتجات لوحة التحكم
+  const prodTbody = document.getElementById("adminProducts");
+  if(prodTbody) {
+    prodTbody.innerHTML = "";
+    (dbData.products || []).forEach((p, idx) => {
+      prodTbody.innerHTML += `
+        <tr>
+          <td>${escapeHTML(p.name)}</td>
+          <td>${escapeHTML(p.category)}</td>
+          <td>${escapeHTML(p.shop)}</td>
+          <td>${p.price} ج</td>
+          <td><button class="delete-btn" onclick="deleteProduct(${idx})">حذف</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  // تحديث جدول محلات لوحة التحكم
+  const shopTbody = document.getElementById("adminShops");
+  if(shopTbody) {
+    shopTbody.innerHTML = "";
+    (dbData.shops || []).forEach((s, idx) => {
+      shopTbody.innerHTML += `
+        <tr>
+          <td>${escapeHTML(s.name)}</td>
+          <td>${escapeHTML(s.address)}</td>
+          <td><a href="${s.mapUrl}" target="_blank">رابط</a></td>
+          <td><button class="edit-btn" onclick="editShop(${idx})">تعديل</button></td>
+          <td><button class="delete-btn" onclick="deleteShop(${idx})">حذف</button></td>
+        </tr>
+      `;
+    });
+  }
+}
+
+document.getElementById("addShopForm")?.addEventListener("submit", async function(e){
   e.preventDefault();
   const name = document.getElementById("newShopName").value.trim();
   const address = document.getElementById("newShopAddress").value.trim();
@@ -594,6 +632,27 @@ document.getElementById("addShopForm").addEventListener("submit", async function
   else { dbData.shops.push({ name, address, mapUrl }); }
   if(await saveProductsToCloud()) { this.reset(); alert("Saved successfully ✅"); }
 });
+
+document.getElementById("addForm")?.addEventListener("submit", async function(e){
+  e.preventDefault();
+  const shop = document.getElementById("shopName").value;
+  const name = document.getElementById("productName").value.trim();
+  const category = document.getElementById("productCategory").value;
+  const sizes = document.getElementById("productSizes").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const image = document.getElementById("productImage").value.trim();
+  const mapUrl = document.getElementById("productMapUrl").value.trim();
+
+  if(!dbData.products) dbData.products = [];
+  dbData.products.push({ id: Date.now(), name, category, shop, price, sizes, image, mapUrl });
+  if(await saveProductsToCloud()) { this.reset(); alert("Product added successfully ✅"); }
+});
+
+async function deleteProduct(index) {
+  if(!confirm("حذف المنتج؟")) return;
+  dbData.products.splice(index, 1);
+  await saveProductsToCloud();
+}
 
 async function editShop(index) {
   const sh = dbData.shops[index];
@@ -642,15 +701,13 @@ function updateCustomerUI(){
   const t = translations[currentLang];
 
   if(customer) {
-    menuBtn.textContent = `👤 ${customer.name}`;
-    logoutBtn.style.display = "block";
-    logoutBtn.textContent = t.customerLogout;
-    greeting.textContent = `أهلاً بيك يا ${customer.name} 👋`;
-    greeting.style.display = "block";
+    if(menuBtn) menuBtn.textContent = `👤 ${customer.name}`;
+    if(logoutBtn) { logoutBtn.style.display = "block"; logoutBtn.textContent = t.customerLogout; }
+    if(greeting) { greeting.textContent = `أهلاً بيك يا ${customer.name} 👋`; greeting.style.display = "block"; }
   } else {
-    menuBtn.textContent = t.customerLogin;
-    logoutBtn.style.display = "none";
-    greeting.style.display = "none";
+    if(menuBtn) menuBtn.textContent = t.customerLogin;
+    if(logoutBtn) logoutBtn.style.display = "none";
+    if(greeting) greeting.style.display = "none";
   }
 }
 
@@ -663,6 +720,7 @@ function customerLogin(){
 
 function closeCustomerPanel(){ document.getElementById("customerPanel").style.display="none"; }
 
+// تسجيل العميل وإرسال إشعار فوري لتليجرام + فتح لوحة التحكم بالباسورد السري
 document.getElementById("customerForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
@@ -672,11 +730,13 @@ document.getElementById("customerForm").addEventListener("submit", async functio
   if(password === ADMIN_PASSWORD){
     closeCustomerPanel();
     document.getElementById("adminPanel").style.display="block";
-    loadCustomersData(); // إعادة تحميل العملاء لمدير الموقع
+    loadCustomersData();
     updateDashboard();
+    this.reset();
     return;
   }
-  if(name.length<2 || phone.replace(/\D/g,"").length<8 || password.length<4){
+
+  if(name.length<2 || phone.replace(/\D/g,"").length<8){
     alert("Please enter valid data."); return;
   }
 
@@ -693,9 +753,24 @@ document.getElementById("customerForm").addEventListener("submit", async functio
     await saveCustomersToCloud();
   }
 
+  // إرسال التنبيه الفوري لجروب تليجرام "الشغل"
+  const message = `🚨 عميل جديد مسجل في الموقع!\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}`;
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if(data.ok) {
+        alert("تم تسجيل الدخول وإرسال الإشعار لجروب التليجرام بنجاح! ✅");
+      } else {
+        alert("تم الحفظ محلياً، ولكن حدث خطأ في إرسال التليجرام.");
+      }
+    })
+    .catch(() => alert("تم الحفظ، وفشل الاتصال بالإنترنت لإرسال تليجرام."));
+
   updateCustomerUI();
   closeCustomerPanel();
-  alert("تم تسجيل الدخول وحفظ بياناتك بنجاح ✅");
+  this.reset();
 });
 
 function customerLogout(){
@@ -714,9 +789,10 @@ function closeAdmin(){ document.getElementById("adminPanel").style.display="none
 
 function renderProducts(){
   const box=document.getElementById("products");
+  if(!box) return;
   box.innerHTML="";
 
-  const searchText = document.getElementById("search").value.toLowerCase();
+  const searchText = document.getElementById("search") ? document.getElementById("search").value.toLowerCase() : "";
   let productsList = [...(dbData.products || [])];
 
   productsList = productsList.filter(p=>{
@@ -748,124 +824,28 @@ function renderProducts(){
     const contentDiv = document.createElement("div");
     contentDiv.className = "card-content";
 
-    const h=document.createElement("h2");
-    h.style.fontSize = "18px"; h.style.margin = "0 0 5px 0";
-    h.textContent=p.name;
-
-    const shopRow = document.createElement("div");
-    shopRow.className = "shop-row";
-    
-    const shopSpan = document.createElement("span");
-    shopSpan.className = "shop";
-    shopSpan.textContent = "محل " + p.shop;
-
-    const mapBtn = document.createElement("button");
-    mapBtn.className = "map-btn-small";
-    mapBtn.textContent = t.mapBtn;
-    mapBtn.onclick = (e) => openShopMapDirect(p.id, e);
-
-    shopRow.append(shopSpan, mapBtn);
-
-    const sizes = document.createElement("div");
-    sizes.innerHTML = `<span class="sizes-badge">${t.sizesLabel}${escapeHTML(p.sizes || "متاح")}</span>`;
-
-    const price=document.createElement("p");
-    price.className="price";
-    price.textContent=Number(p.price).toLocaleString("ar-EG") + t.priceUnit;
-
-    contentDiv.append(h, shopRow, sizes, price);
+    contentDiv.innerHTML = `
+      <h2 style="font-size:18px;margin:0 0 8px">${escapeHTML(p.name)}</h2>
+      <div class="shop-row">
+        <span class="shop">🏪 ${escapeHTML(p.shop)}</span>
+      </div>
+      <div class="price">${Number(p.price).toLocaleString("ar-EG")}${t.priceUnit}</div>
+      <span class="sizes-badge">${t.sizesLabel}${escapeHTML(p.sizes || 'متاح')}</span>
+    `;
     card.append(img, contentDiv);
     box.append(card);
   });
-
   updateDashboard();
 }
 
-document.getElementById("search").addEventListener("input",renderProducts);
+document.getElementById("search")?.addEventListener("input", renderProducts);
 
-document.getElementById("addForm").addEventListener("submit",async function(e){
-  e.preventDefault();
-  const shop=document.getElementById("shopName").value.trim();
-  const name=document.getElementById("productName").value.trim();
-  const category=document.getElementById("productCategory").value;
-  const sizes=document.getElementById("productSizes").value.trim();
-  const price=Number(document.getElementById("productPrice").value);
-  const image=document.getElementById("productImage").value.trim();
-  const mapUrl=document.getElementById("productMapUrl").value.trim();
-
-  if(!shop||!name||!sizes||!Number.isFinite(price)||price<=0) return;
-
-  if(!dbData.products) dbData.products = [];
-  dbData.products.push({ id:Date.now(), shop, name, category, sizes, price, image:image||"https://via.placeholder.com/400x300?text=Product", mapUrl:mapUrl||"" });
-  if(await saveProductsToCloud()) { this.reset(); alert("Added successfully ✅"); }
-});
-
-async function editProduct(id){
-  const p=dbData.products.find(x=>x.id===id);
-  if(!p)return;
-  let name=prompt("Name:",p.name); if(name===null)return;
-  let mapUrl=prompt("Map URL:",p.mapUrl||""); if(mapUrl===null)return;
-  let sizes=prompt("Sizes:",p.sizes); if(sizes===null)return;
-  let price=prompt("Price:",p.price); if(price===null)return;
-  let image=prompt("Image URL:",p.image); if(image===null)return;
-
-  p.name=name.trim(); p.mapUrl=mapUrl.trim(); p.sizes=sizes.trim(); p.price=Number(price); p.image=image.trim()||p.image;
-  if(await saveProductsToCloud()) alert("Updated successfully ✅");
-}
-
-async function deleteProduct(id){
-  if(!confirm("Delete product?"))return;
-  dbData.products = dbData.products.filter(p=>p.id!==id);
-  if(await saveProductsToCloud()) alert("Deleted successfully ✅");
-}
-
-function updateDashboard(){
-  const prods = dbData.products || [];
-  const shops = dbData.shops || [];
-  const customers = customersData.customers || [];
-
-  document.getElementById("totalProducts").textContent = prods.length;
-  document.getElementById("totalShops").textContent = shops.length;
-  document.getElementById("totalCustomers").textContent = customers.length;
-
-  const custTbody = document.getElementById("adminCustomers");
-  custTbody.innerHTML = "";
-  if(!customers.length) {
-    custTbody.innerHTML = '<tr><td colspan="4" class="empty">لا توجد عملاء مسجلين حتى الآن</td></tr>';
-  } else {
-    customers.forEach((c, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${escapeHTML(c.name)}</td>
-        <td><a href="tel:${escapeHTML(c.phone)}" style="color:#2563eb;font-weight:bold">${escapeHTML(c.phone)}</a></td>
-        <td>${escapeHTML(c.date || "حديث")}</td>
-        <td><button class="delete-btn" onclick="deleteCustomer(${index})">حذف</button></td>
-      `;
-      custTbody.append(tr);
-    });
-  }
-
-  const shopsTbody = document.getElementById("adminShops");
-  shopsTbody.innerHTML = "";
-  shops.forEach((sh, index) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${escapeHTML(sh.name)}</td><td>${escapeHTML(sh.address)}</td><td><a href="${sh.mapUrl}" target="_blank">Map</a></td><td><button class="edit-btn" onclick="editShop(${index})">Edit</button></td><td><button class="delete-btn" onclick="deleteShop(${index})">Del</button></td>`;
-    shopsTbody.append(tr);
-  });
-
-  const tbody=document.getElementById("adminProducts");
-  tbody.innerHTML="";
-  if(!prods.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">No products</td></tr>'; return; }
-  prods.forEach(p=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${escapeHTML(p.name)}</td><td>${escapeHTML(p.category)}</td><td>${escapeHTML(p.shop)}</td><td>${Number(p.price)} ج</td><td><button class="edit-btn" onclick="editProduct(${p.id})">Edit</button></td><td><button class="delete-btn" onclick="deleteProduct(${p.id})">Del</button></td>`;
-    tbody.append(tr);
-  });
-}
-
-loadProductsData();
-loadCustomersData();
-updateCustomerUI();
+window.onload = function() {
+  loadProductsData();
+  loadCustomersData();
+  updateCustomerUI();
+};
 </script>
+
 </body>
 </html>
