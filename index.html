@@ -150,7 +150,7 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <div class="welcome">
 <h2>أهلاً بك يا مدير الموقع 👋</h2>
-<p>إدارة المنتجات وتحديثها بسهولة تامة.</p>
+<p>أي إضافة أو تعديل هنا سيظهر فوراً لجميع المستخدمين وصديقك.</p>
 </div>
 
 <div class="dashboard-stats">
@@ -232,44 +232,64 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <script>
 const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
+
+// === إعدادات JSONBin السحابية ===
+const BIN_ID = "6afcee94ac6210605a902930";
+const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q";
+// ===================================
+
 let products = [];
 
-// جلب البيانات من ملف products.json المحلي بسلاسة
+// جلب المنتجات من القاعدة السحابية
 async function loadProducts() {
   try {
-    // التحقق أولاً من وجود التخزين المحلي المحفوظ لضمان سرعة التحديث
-    const savedLocal = localStorage.getItem("mansouraProducts");
-    if(savedLocal) {
-      products = JSON.parse(savedLocal);
-      renderProducts();
-    }
-    
-    const url = `products.json?t=${Date.now()}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      if(!savedLocal || data.length >= products.length) {
-        products = data;
-        localStorage.setItem("mansouraProducts", JSON.stringify(products));
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: {
+        "X-Master-Key": MASTER_KEY
       }
-    }
+    });
+    if (!res.ok) throw new Error("فشل التحميل");
+    const data = await res.json();
+    products = data.record || [];
     renderProducts();
   } catch (err) {
     console.error(err);
-    const savedLocal = localStorage.getItem("mansouraProducts");
-    if(savedLocal) {
-      products = JSON.parse(savedLocal);
-      renderProducts();
-    } else {
-      document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات.</p>`;
-    }
+    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات من السحابة.</p>`;
   }
 }
 
-// حفظ وتحديث المنتجات محلياً لتظهر فوراً وبدون أي أخطاء توكن
-function saveProductsLocally() {
-  localStorage.setItem("mansouraProducts", JSON.stringify(products));
-  renderProducts();
+// حفظ المنتجات في القاعدة السحابية ليراها الجميع فوراً
+async function saveProductsToCloud() {
+  const submitBtn = document.getElementById("submitBtn");
+  if(submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "جاري الحفظ للجميع...";
+  }
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": MASTER_KEY
+      },
+      body: JSON.stringify(products)
+    });
+
+    if (!res.ok) throw new Error("فشل الحفظ");
+    
+    renderProducts();
+    return true;
+  } catch (err) {
+    alert("حدث خطأ أثناء الحفظ بالسحابة.");
+    console.error(err);
+    return false;
+  } finally {
+    if(submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "إضافة المنتج والمحل";
+    }
+  }
 }
 
 function escapeHTML(v){
@@ -402,7 +422,7 @@ function applySearch(){
 document.getElementById("search").addEventListener("input",applySearch);
 
 /* إضافة منتج */
-document.getElementById("addForm").addEventListener("submit",function(e){
+document.getElementById("addForm").addEventListener("submit",async function(e){
   e.preventDefault();
 
   const shop=document.getElementById("shopName").value.trim();
@@ -415,6 +435,8 @@ document.getElementById("addForm").addEventListener("submit",function(e){
     return;
   }
 
+  await loadProducts();
+
   products.push({
     id:Date.now(),
     shop,
@@ -423,13 +445,15 @@ document.getElementById("addForm").addEventListener("submit",function(e){
     image:image||"https://via.placeholder.com/400x300?text=Product"
   });
 
-  saveProductsLocally();
-  this.reset();
-  alert("تمت إضافة المنتج ومحل بنجاح وتحديث اللوحة ✅");
+  const saved = await saveProductsToCloud();
+  if(saved) {
+    this.reset();
+    alert("تمت إضافة المنتج والمحل بنجاح وسيظهر للجميع فوراً ✅");
+  }
 });
 
 /* تعديل المنتج */
-function editProduct(id){
+async function editProduct(id){
   const p=products.find(x=>x.id===id);
   if(!p)return;
 
@@ -459,17 +483,19 @@ function editProduct(id){
   p.price=price;
   p.image=image.trim()||p.image;
 
-  saveProductsLocally();
-  alert("تم تعديل المنتج بنجاح ✅");
+  const saved = await saveProductsToCloud();
+  if(saved) alert("تم تعديل المنتج بنجاح للجميع ✅");
 }
 
 /* حذف المنتج */
-function deleteProduct(id){
-  if(!confirm("هل أنت متأكد من حذف المنتج؟"))return;
+async function deleteProduct(id){
+  if(!confirm("هل أنت متأكد من حذف المنتج؟ سيُحذف من عند الجميع."))return;
 
+  await loadProducts();
   products=products.filter(p=>p.id!==id);
-  saveProductsLocally();
-  alert("تم الحذف بنجاح ✅");
+
+  const saved = await saveProductsToCloud();
+  if(saved) alert("تم الحذف بنجاح ✅");
 }
 
 /* تحديث لوحة التحكم */
