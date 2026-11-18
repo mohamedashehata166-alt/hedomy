@@ -717,7 +717,7 @@ function customerLogin(){
 
 function closeCustomerPanel(){ document.getElementById("customerPanel").style.display="none"; }
 
-// تسجيل العميل وإرسال إشعار فوري لتليجرام بطريقة Image الآمنة المضمونة 100%
+// تسجيل العميل وإرسال تليجرام باستخدام fetch بدون أخطاء CORS
 document.getElementById("customerForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
@@ -750,14 +750,17 @@ document.getElementById("customerForm").addEventListener("submit", async functio
     await saveCustomersToCloud();
   }
 
-  // إرسال التنبيه الفوري لجروب تليجرام "الشغل" بدون مشاكل CORS
+  // إرسال التنبيه لجروب "الشغل" بدون اعتراض المتصفح
   const message = `🚨 عميل جديد مسجل في الموقع!\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}`;
-  const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
-  
-  const img = new Image();
-  img.src = telegramUrl;
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
 
-  alert("تم تسجيل الدخول وإرسال الإشعار لجروب التليجرام بنجاح! ✅");
+  fetch(url, { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+      alert("تم تسجيل الدخول وإرسال الإشعار لجروب التليجرام بنجاح! ✅");
+    })
+    .catch(() => {
+      alert("تم تسجيل بياناتك بنجاح ✅");
+    });
 
   updateCustomerUI();
   closeCustomerPanel();
