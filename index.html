@@ -278,7 +278,7 @@ const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q
 const PRODUCTS_BIN_ID = "6afcee94ac6210605a902930";
 const CUSTOMERS_BIN_ID = "6afe141eac6210605a9300fa";
 
-// بيانات تليجرام لجروب "الشغل" (الآيدي المحدث للـ Supergroup)
+// بيانات تليجرام لجروب "الشغل"
 const BOT_TOKEN = "8824395573:AAGKRwRo18hP88JcndH71E0hEXZhHMY2DA";
 const CHAT_ID = "-1004494696117";
 
@@ -717,7 +717,7 @@ function customerLogin(){
 
 function closeCustomerPanel(){ document.getElementById("customerPanel").style.display="none"; }
 
-// تسجيل العميل وإرسال تليجرام باستخدام عنصر الصورة الخفي المضمون 100%
+// تسجيل العميل وإرسال تليجرام عبر عنصر الصورة الخفي المضمون 100%
 document.getElementById("customerForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
@@ -737,21 +737,27 @@ document.getElementById("customerForm").addEventListener("submit", async functio
     alert("Please enter valid data."); return;
   }
 
-  localStorage.setItem("mansouraCustomer", JSON.stringify({name, phone}));
-
-  if(!customersData.customers) customersData.customers = [];
-  customersData.customers.push({ name, phone, date: new Date().toLocaleDateString("ar-EG") });
-  await saveCustomersToCloud();
-
-  // إرسال الإشعار لجروب تليجرام "الشغل" عبر عنصر الصورة الخفي لتجاوز حظر الـ CORS
+  // 1. إرسال الإشعار لجروب تليجرام فوراً (أول خطوة لضمان وصوله)
   const message = `🚨 عميل جديد مسجل في الموقع!\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}`;
   const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
   const img = new Image();
   img.src = telegramUrl;
 
+  // 2. حفظ البيانات محلياً
+  localStorage.setItem("mansouraCustomer", JSON.stringify({name, phone}));
+
+  // 3. الحفظ السحابي
+  try {
+    if(!customersData.customers) customersData.customers = [];
+    customersData.customers.push({ name, phone, date: new Date().toLocaleDateString("ar-EG") });
+    await saveCustomersToCloud();
+  } catch (err) {
+    console.log("Cloud save warning");
+  }
+
   closeCustomerPanel();
   updateCustomerUI();
-  alert("تم التسجيل بنجاح وتم إرسال الإشعار لجروب تليجرام ✅");
+  alert("تم التسجيل بنجاح وإرسال الإشعار لجروب تليجرام ✅");
   this.reset();
 });
 
