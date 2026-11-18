@@ -275,7 +275,6 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
 const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q";
 
-// جداول JSONBin المستقلة تماماً
 const PRODUCTS_BIN_ID = "6afcee94ac6210605a902930";
 const CUSTOMERS_BIN_ID = "6afe14eac6210605a9300fa";
 
@@ -386,7 +385,6 @@ function togglePriceSort() {
   renderProducts();
 }
 
-/* جلب بيانات المنتجات والمحلات */
 async function loadProductsData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${PRODUCTS_BIN_ID}/latest`, {
@@ -411,7 +409,6 @@ async function loadProductsData() {
   }
 }
 
-/* جلب بيانات العملاء من البين المستقل */
 async function loadCustomersData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}/latest`, {
@@ -445,8 +442,25 @@ async function saveProductsToCloud() {
   }
 }
 
+/* دالة حفظ العملاء المحدثة لضمان جلب ودمج البيانات بسلاسة */
 async function saveCustomersToCloud() {
   try {
+    // جلب أحدث نسخة أولاً لتجنب مسح التسجيلات السابقة
+    const getRes = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}/latest`, {
+      headers: { "X-Master-Key": MASTER_KEY }
+    });
+    if(getRes.ok) {
+      const latestData = await getRes.json();
+      if(latestData.record && Array.isArray(latestData.record.customers)) {
+        // دمج العملاء بدون تكرار حسب رقم الموبايل
+        latestData.record.customers.forEach(oldC => {
+          if(!customersData.customers.some(c => c.phone === oldC.phone)) {
+            customersData.customers.push(oldC);
+          }
+        });
+      }
+    }
+
     const res = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
@@ -602,7 +616,6 @@ async function deleteShop(index) {
   if(await saveProductsToCloud()) alert("Deleted successfully ✅");
 }
 
-/* حذف عميل من جدول العملاء المستقل */
 async function deleteCustomer(index) {
   if(!confirm("هل أنت متأكد من حذف هذا العميل؟")) return;
   if(!customersData.customers) customersData.customers = [];
@@ -659,6 +672,7 @@ document.getElementById("customerForm").addEventListener("submit", async functio
   if(password === ADMIN_PASSWORD){
     closeCustomerPanel();
     document.getElementById("adminPanel").style.display="block";
+    loadCustomersData(); // إعادة تحميل العملاء لمدير الموقع
     updateDashboard();
     return;
   }
@@ -666,10 +680,8 @@ document.getElementById("customerForm").addEventListener("submit", async functio
     alert("Please enter valid data."); return;
   }
 
-  // حفظ محلياً
   localStorage.setItem("mansouraCustomer", JSON.stringify({name, phone}));
 
-  // رفع وحفظ بيانات العميل في جدول العملاء المستقل السحابي
   if(!customersData.customers) customersData.customers = [];
   const existingCust = customersData.customers.find(c => c.phone === phone);
   if(!existingCust) {
@@ -816,7 +828,6 @@ function updateDashboard(){
   document.getElementById("totalShops").textContent = shops.length;
   document.getElementById("totalCustomers").textContent = customers.length;
 
-  // جدول العملاء المستقل في لوحة التحكم
   const custTbody = document.getElementById("adminCustomers");
   custTbody.innerHTML = "";
   if(!customers.length) {
@@ -852,7 +863,6 @@ function updateDashboard(){
   });
 }
 
-// تحميل البيانات من الجدولين المستقلين عند فتح الموقع
 loadProductsData();
 loadCustomersData();
 updateCustomerUI();
