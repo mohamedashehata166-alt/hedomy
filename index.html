@@ -150,7 +150,7 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <div class="welcome">
 <h2>أهلاً بك يا مدير الموقع 👋</h2>
-<p>أي إضافة أو تعديل هنا سيظهر تلقائياً لجميع المستخدمين.</p>
+<p>إدارة المنتجات وتحديثها بسهولة تامة.</p>
 </div>
 
 <div class="dashboard-stats">
@@ -232,85 +232,44 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <script>
 const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
-
-// === إعدادات جيت هب ===
-const GITHUB_OWNER = "mohamedashehata166-alt";
-const GITHUB_REPO = "hedomy";
-const GITHUB_FILE = "products.json";
-const GITHUB_TOKEN = "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"; 
-// ===============================================================
-
 let products = [];
 
-// جلب البيانات من ملف products.json مباشرة
+// جلب البيانات من ملف products.json المحلي بسلاسة
 async function loadProducts() {
   try {
+    // التحقق أولاً من وجود التخزين المحلي المحفوظ لضمان سرعة التحديث
+    const savedLocal = localStorage.getItem("mansouraProducts");
+    if(savedLocal) {
+      products = JSON.parse(savedLocal);
+      renderProducts();
+    }
+    
     const url = `products.json?t=${Date.now()}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error("فشل التحميل");
-    products = await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if(!savedLocal || data.length >= products.length) {
+        products = data;
+        localStorage.setItem("mansouraProducts", JSON.stringify(products));
+      }
+    }
     renderProducts();
   } catch (err) {
     console.error(err);
-    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات.</p>`;
+    const savedLocal = localStorage.getItem("mansouraProducts");
+    if(savedLocal) {
+      products = JSON.parse(savedLocal);
+      renderProducts();
+    } else {
+      document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات.</p>`;
+    }
   }
 }
 
-// دالة حفظ محدثة ومباشرة لضمان عدم حدوث خطأ الـ SHA
-async function saveProductsToGitHub() {
-  const submitBtn = document.getElementById("submitBtn");
-  if(submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "جاري الحفظ للجميع...";
-  }
-
-  try {
-    // 1. جلب الـ SHA المحدث حالياً من جيت هب أولاً
-    const getUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`;
-    const getRes = await fetch(getUrl, {
-      headers: {
-        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json"
-      }
-    });
-    
-    if (!getRes.ok) throw new Error("فشل جلب تفاصيل الملف من جيت هب");
-    const fileData = await getRes.json();
-    const currentSha = fileData.sha;
-
-    // 2. إرسال التحديث برفع البيانات الجديدة مع الـ SHA الصحيح
-    const jsonString = JSON.stringify(products, null, 2);
-    const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
-
-    const putUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-    const putRes = await fetch(putUrl, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: "تحديث المنتجات من لوحة التحكم",
-        content: encodedContent,
-        sha: currentSha
-      })
-    });
-
-    if (!putRes.ok) throw new Error("فشل الحفظ في جيت هب");
-    
-    renderProducts();
-    return true;
-  } catch (err) {
-    alert("حدث خطأ أثناء الحفظ. تأكد من صحة التوكن أو الاتصال بالإنترنت.");
-    console.error(err);
-    return false;
-  } finally {
-    if(submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "إضافة المنتج والمحل";
-    }
-  }
+// حفظ وتحديث المنتجات محلياً لتظهر فوراً وبدون أي أخطاء توكن
+function saveProductsLocally() {
+  localStorage.setItem("mansouraProducts", JSON.stringify(products));
+  renderProducts();
 }
 
 function escapeHTML(v){
@@ -443,7 +402,7 @@ function applySearch(){
 document.getElementById("search").addEventListener("input",applySearch);
 
 /* إضافة منتج */
-document.getElementById("addForm").addEventListener("submit",async function(e){
+document.getElementById("addForm").addEventListener("submit",function(e){
   e.preventDefault();
 
   const shop=document.getElementById("shopName").value.trim();
@@ -456,8 +415,6 @@ document.getElementById("addForm").addEventListener("submit",async function(e){
     return;
   }
 
-  await loadProducts();
-
   products.push({
     id:Date.now(),
     shop,
@@ -466,15 +423,13 @@ document.getElementById("addForm").addEventListener("submit",async function(e){
     image:image||"https://via.placeholder.com/400x300?text=Product"
   });
 
-  const saved = await saveProductsToGitHub();
-  if(saved) {
-    this.reset();
-    alert("تمت إضافة المنتج والمحل بنجاح وسيظهر عند الجميع ✅");
-  }
+  saveProductsLocally();
+  this.reset();
+  alert("تمت إضافة المنتج ومحل بنجاح وتحديث اللوحة ✅");
 });
 
 /* تعديل المنتج */
-async function editProduct(id){
+function editProduct(id){
   const p=products.find(x=>x.id===id);
   if(!p)return;
 
@@ -504,19 +459,17 @@ async function editProduct(id){
   p.price=price;
   p.image=image.trim()||p.image;
 
-  const saved = await saveProductsToGitHub();
-  if(saved) alert("تم تعديل المنتج بنجاح للجميع ✅");
+  saveProductsLocally();
+  alert("تم تعديل المنتج بنجاح ✅");
 }
 
 /* حذف المنتج */
-async function deleteProduct(id){
-  if(!confirm("هل أنت متأكد من حذف المنتج؟ سيُحذف من عند الجميع."))return;
+function deleteProduct(id){
+  if(!confirm("هل أنت متأكد من حذف المنتج؟"))return;
 
-  await loadProducts();
   products=products.filter(p=>p.id!==id);
-
-  const saved = await saveProductsToGitHub();
-  if(saved) alert("تم الحذف بنجاح ✅");
+  saveProductsLocally();
+  alert("تم الحذف بنجاح ✅");
 }
 
 /* تحديث لوحة التحكم */
