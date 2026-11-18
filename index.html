@@ -10,18 +10,40 @@
 body{font-family:Arial;background:#f4f5f9;margin:0;color:#222}
 header{background:#111827;color:white;padding:25px 15px;text-align:center}
 header h1{margin:0 0 8px}
-.search{text-align:center;padding:22px}
-input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outline:none}
-.search input{width:min(90%,400px)}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;padding:20px;max-width:1200px;margin:auto}
-.card{background:white;padding:15px;border-radius:15px;box-shadow:0 3px 15px #0000000d}
-.card img{width:100%;height:230px;object-fit:cover;border-radius:10px;background:#eee}
-.shop{color:#2563eb;font-weight:bold}
-.price{color:#059669;font-size:22px;font-weight:bold}
 
-.menu-btn{position:fixed;top:15px;right:15px;padding:10px 15px;font-size:23px;border:0;border-radius:10px;cursor:pointer;z-index:1000;background:white}
+.search-section{text-align:center;padding:22px 15px 10px}
+input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outline:none}
+.search-section input{width:min(90%,400px)}
+
+/* شريط الأقسام */
+.categories-bar{display:flex;justify-content:center;gap:10px;padding:10px 15px 20px;flex-wrap:wrap}
+.cat-btn{background:white;border:1px solid #cbd5e1;padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:bold;color:#475569;transition:0.2s}
+.cat-btn.active, .cat-btn:hover{background:#4f46e5;color:white;border-color:#4f46e5}
+
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;padding:20px;max-width:1200px;margin:auto}
+.card{background:white;padding:15px;border-radius:15px;box-shadow:0 3px 15px #0000000d;display:flex;flex-direction:column;justify-content:space-between}
+.card img{width:100%;height:230px;object-fit:cover;border-radius:10px;background:#eee}
+.shop{color:#2563eb;font-weight:bold;margin:8px 0 4px;cursor:pointer}
+.shop:hover{text-decoration:underline}
+.price{color:#059669;font-size:22px;font-weight:bold;margin:8px 0}
+.sizes-badge{background:#f1f5f9;color:#334155;padding:5px 10px;border-radius:6px;font-size:13px;display:inline-block;margin-top:5px}
+
+/* أزرار الهيدر العلوية */
+.top-buttons{position:fixed;top:15px;right:15px;display:flex;gap:8px;z-index:1000}
+.menu-btn, .shops-nav-btn{padding:10px 14px;font-size:18px;border:0;border-radius:10px;cursor:pointer;background:white;box-shadow:0 2px 10px #0002;font-weight:bold;color:#1e293b}
+
 #menu{display:none;position:fixed;top:70px;right:15px;background:white;padding:12px;border-radius:12px;box-shadow:0 5px 25px #0003;z-index:1000;width:200px}
 #menu button{width:100%;margin:5px 0;padding:11px;border:0;border-radius:8px;background:#f1f5f9;cursor:pointer;font-size:14px}
+
+/* نافذة عرض المحلات وعناوينها */
+#shopsModal{display:none;position:fixed;inset:0;z-index:4500;background:#0f172aee;align-items:center;justify-content:center;padding:16px}
+.shops-modal-card{width:min(100%,500px);background:white;border-radius:22px;padding:25px;box-shadow:0 25px 80px #0005;max-height:80vh;overflow-y:auto}
+.shops-modal-card h2{margin-top:0;color:#1e293b}
+.shop-item-box{background:#f8fafc;border:1px solid #e2e8f0;padding:15px;border-radius:12px;margin-bottom:12px}
+.shop-item-box h3{margin:0 0 5px;color:#2563eb}
+.shop-item-box p{margin:0 0 10px;color:#64748b;font-size:14px}
+.map-link{display:inline-block;background:#059669;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold}
+.close-shops-modal{background:#ef4444;color:white;border:0;padding:10px;width:100%;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:15px}
 
 /* واجهة العميل */
 #customerPanel{display:none;position:fixed;inset:0;z-index:4000;background:#0f172aee;align-items:center;justify-content:center;padding:16px}
@@ -52,12 +74,12 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 .stat-card{background:white;padding:20px;border-radius:14px;box-shadow:0 3px 12px #00000008;border-right:4px solid #6366f1}
 .stat-card small{color:#64748b}
 .stat-card h2{margin:10px 0 0;font-size:28px}
-.admin-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.4fr);gap:20px;align-items:start}
+.admin-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.4fr);gap:20px;align-items:start;margin-bottom:25px}
 .admin-box{background:white;padding:22px;border-radius:15px;box-shadow:0 3px 15px #0000000a}
 .admin-box h3{margin-top:0}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;margin-bottom:7px;font-weight:bold;font-size:14px}
-.form-group input{width:100%;background:#f8fafc}
+.form-group input, .form-group select{width:100%;background:#f8fafc}
 .primary-btn{background:#4f46e5;color:white;border:0;padding:12px;width:100%;border-radius:9px;font-size:15px;font-weight:bold;cursor:pointer}
 .primary-btn:disabled{background:#94a3b8;cursor:not-allowed}
 .products-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -77,7 +99,11 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <body>
 
+<!-- الأزرار العلوية -->
+<div class="top-buttons">
+<button class="shops-nav-btn" onclick="openShopsModal()">🏪 المحلات</button>
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
+</div>
 
 <div id="menu">
 <button id="customerMenuBtn" onclick="customerLogin()">👤 تسجيل دخول كعميل</button>
@@ -92,8 +118,30 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <div id="customerGreeting"></div>
 
-<div class="search">
+<!-- نافذة عرض جميع المحلات وعناوينها وروابط الخرائط -->
+<div id="shopsModal">
+<div class="shops-modal-card">
+<h2>🏪 دليل المحلات وعناوينها</h2>
+<p style="color:#64748b;font-size:13px;margin-bottom:15px">اضغط على زر خريطة جوجل للوصول لمقر المحل مباشرة.</p>
+<div id="shopsListContainer">
+<p class="empty">جاري تحميل المحلات...</p>
+</div>
+<button class="close-shops-modal" onclick="closeShopsModal()">إغلاق النافذة</button>
+</div>
+</div>
+
+<!-- شريط البحث والأقسام -->
+<div class="search-section">
 <input type="text" id="search" placeholder="ابحث عن منتج أو محل...">
+</div>
+
+<div class="categories-bar" id="categoriesBar">
+<button class="cat-btn active" onclick="filterCategory('الكل', this)">الكل</button>
+<button class="cat-btn" onclick="filterCategory('بنطلون', this)">👖 بنطلونات</button>
+<button class="cat-btn" onclick="filterCategory('هودي', this)">🧥 هودي</button>
+<button class="cat-btn" onclick="filterCategory('تيشرت', this)">👕 تيشرتات</button>
+<button class="cat-btn" onclick="filterCategory('جاكيت', this)">🧥 جواكيت</button>
+<button class="cat-btn" onclick="filterCategory('أخرى', this)">✨ أخرى</button>
 </div>
 
 <div class="products" id="products">
@@ -103,38 +151,24 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 <!-- واجهة العميل -->
 <div id="customerPanel">
 <div class="customer-card">
-
 <div class="customer-icon">👤</div>
-
 <h2 id="customerTitle">أهلاً بيك في موقعنا</h2>
-
-<p class="hint">
-سجّل بياناتك عشان نقدر نرحب بيك في كل مرة تزور فيها الموقع.
-</p>
-
+<p class="hint">سجّل بياناتك عشان نقدر نرحب بيك في كل مرة تزور فيها الموقع.</p>
 <form id="customerForm">
-
 <div class="customer-field">
 <label for="customerName">الاسم</label>
 <input id="customerName" type="text" maxlength="60" placeholder="اكتب اسمك" required>
 </div>
-
 <div class="customer-field">
 <label for="customerPhone">رقم الموبايل</label>
 <input id="customerPhone" type="tel" inputmode="tel" maxlength="20" placeholder="مثال: 01012345678" required>
 </div>
-
 <div class="customer-actions">
 <button class="save-customer" type="submit">حفظ البيانات</button>
 <button class="cancel-customer" type="button" onclick="closeCustomerPanel()">إلغاء</button>
 </div>
-
 </form>
-
-<p class="customer-note">
-بياناتك بتتحفظ على نفس المتصفح والجهاز فقط. مش هتتم مشاركتها مع المحلات من خلال الموقع.
-</p>
-
+<p class="customer-note">بياناتك بتتحفظ على نفس المتصفح والجهاز فقط.</p>
 </div>
 </div>
 
@@ -150,83 +184,108 @@ input{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outlin
 
 <div class="welcome">
 <h2>أهلاً بك يا مدير الموقع 👋</h2>
-<p>أي إضافة أو تعديل هنا سيظهر فوراً لجميع المستخدمين وصديقك.</p>
+<p>تحكم بإضافة المحلات وعناوينها وروابط الخرائط، وإضافة المنتجات بمقاساتها للجميع.</p>
 </div>
 
 <div class="dashboard-stats">
-
 <div class="stat-card">
 <small>إجمالي المنتجات</small>
 <h2 id="totalProducts">0</h2>
 </div>
-
 <div class="stat-card">
 <small>عدد المحلات</small>
 <h2 id="totalShops">0</h2>
 </div>
-
 <div class="stat-card">
 <small>أقل سعر</small>
 <h2 id="lowestPrice">0</h2>
 </div>
-
 </div>
 
 <div class="admin-grid">
 
+<!-- نموذج إضافة محل جديد -->
 <div class="admin-box">
-<h3>➕ إضافة محل ومنتج</h3>
-
-<form id="addForm">
-
+<h3>🏪 إضافة محل جديد وعنوانه</h3>
+<form id="addShopForm">
 <div class="form-group">
 <label>اسم المحل</label>
-<input id="shopName" type="text" placeholder="مثال: Fashion Store" required>
+<input id="newShopName" type="text" placeholder="مثال: Fashion Store" required>
+</div>
+<div class="form-group">
+<label>عنوان المحل بالتفصيل</label>
+<input id="newShopAddress" type="text" placeholder="مثال: المنصورة، شارع الجلاء" required>
+</div>
+<div class="form-group">
+<label>رابط خريطة جوجل (Google Maps URL)</label>
+<input id="newShopMap" type="url" placeholder="https://maps.app.goo.gl/..." required>
+</div>
+<button class="primary-btn" type="submit">حفظ وإضافة المحل</button>
+</form>
 </div>
 
+<!-- نموذج إضافة منتج -->
+<div class="admin-box">
+<h3>➕ إضافة منتج جديد</h3>
+<form id="addForm">
+<div class="form-group">
+<label>اختر المحل</label>
+<select id="shopName" required>
+<option value="">اختر المحل أولاً...</option>
+</select>
+</div>
 <div class="form-group">
 <label>اسم المنتج</label>
-<input id="productName" type="text" placeholder="مثال: بنطلون جينز" required>
+<input id="productName" type="text" placeholder="مثال: بنطلون جينز واسع" required>
 </div>
-
+<div class="form-group">
+<label>القسم</label>
+<select id="productCategory" required>
+<option value="بنطلون">بنطلون</option>
+<option value="هودي">هودي</option>
+<option value="تيشرت">تيشرت</option>
+<option value="جاكيت">جاكيت</option>
+<option value="أخرى">أخرى</option>
+</select>
+</div>
+<div class="form-group">
+<label>المقاسات المتاحة</label>
+<input id="productSizes" type="text" placeholder="مثال: S, M, L, XL أو 30, 32" required>
+</div>
 <div class="form-group">
 <label>السعر بالجنيه</label>
 <input id="productPrice" type="number" min="1" placeholder="مثال: 450" required>
 </div>
-
 <div class="form-group">
 <label>رابط صورة المنتج (اختياري)</label>
 <input id="productImage" type="url" placeholder="https://example.com/image.jpg">
 </div>
-
-<button class="primary-btn" id="submitBtn" type="submit">إضافة المنتج والمحل</button>
-
+<button class="primary-btn" id="submitBtn" type="submit">إضافة المنتج</button>
 </form>
 </div>
 
-<div class="admin-box">
-<h3>📦 إدارة المنتجات</h3>
+</div>
 
+<!-- جدول إدارة المنتجات -->
+<div class="admin-box" style="margin-bottom:30px">
+<h3>📦 إدارة المنتجات</h3>
 <div style="overflow-x:auto">
 <table class="products-table">
-
 <thead>
 <tr>
 <th>المنتج</th>
+<th>القسم</th>
 <th>المحل</th>
 <th>السعر</th>
 <th>تعديل</th>
 <th>حذف</th>
 </tr>
 </thead>
-
 <tbody id="adminProducts"></tbody>
-
 </table>
 </div>
 </div>
 
-</div>
 </div>
 </div>
 
@@ -238,34 +297,42 @@ const BIN_ID = "6afcee94ac6210605a902930";
 const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q";
 // ===================================
 
-let products = [];
+let dbData = {
+  products: [],
+  shops: []
+};
+let currentCategory = "الكل";
 
-// جلب المنتجات من القاعدة السحابية
-async function loadProducts() {
+// جلب البيانات من السحابة
+async function loadData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-      headers: {
-        "X-Master-Key": MASTER_KEY
-      }
+      headers: { "X-Master-Key": MASTER_KEY }
     });
     if (!res.ok) throw new Error("فشل التحميل");
     const data = await res.json();
-    products = data.record || [];
+    
+    if (Array.isArray(data.record)) {
+      dbData.products = data.record;
+      dbData.shops = [...new Set(data.record.map(p => p.shop))].map(s => ({
+        name: s,
+        address: "المنصورة",
+        mapUrl: "https://maps.google.com"
+      }));
+    } else {
+      dbData = data.record || { products: [], shops: [] };
+    }
+    
     renderProducts();
+    updateShopsDropdown();
   } catch (err) {
     console.error(err);
     document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات من السحابة.</p>`;
   }
 }
 
-// حفظ المنتجات في القاعدة السحابية ليراها الجميع فوراً
-async function saveProductsToCloud() {
-  const submitBtn = document.getElementById("submitBtn");
-  if(submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "جاري الحفظ للجميع...";
-  }
-
+// حفظ البيانات في السحابة
+async function saveDataToCloud() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
       method: "PUT",
@@ -273,22 +340,16 @@ async function saveProductsToCloud() {
         "Content-Type": "application/json",
         "X-Master-Key": MASTER_KEY
       },
-      body: JSON.stringify(products)
+      body: JSON.stringify(dbData)
     });
-
     if (!res.ok) throw new Error("فشل الحفظ");
-    
     renderProducts();
+    updateShopsDropdown();
     return true;
   } catch (err) {
     alert("حدث خطأ أثناء الحفظ بالسحابة.");
     console.error(err);
     return false;
-  } finally {
-    if(submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "إضافة المنتج والمحل";
-    }
   }
 }
 
@@ -298,7 +359,81 @@ function escapeHTML(v){
   }[c]));
 }
 
-/* بيانات العميل */
+/* نافذة المحلات */
+function openShopsModal() {
+  const container = document.getElementById("shopsListContainer");
+  container.innerHTML = "";
+  
+  if(!dbData.shops || !dbData.shops.length) {
+    container.innerHTML = '<p class="empty">لا توجد محلات مسجلة حتى الآن</p>';
+  } else {
+    dbData.shops.forEach(sh => {
+      const box = document.createElement("div");
+      box.className = "shop-item-box";
+      box.innerHTML = `
+        <h3>${escapeHTML(sh.name)}</h3>
+        <p>📍 العنوان: ${escapeHTML(sh.address || "غير محدد")}</p>
+        <a href="${sh.mapUrl || '#'}" target="_blank" class="map-link">📍 افتح الموقع على جوجل ماب</a>
+      `;
+      container.append(box);
+    });
+  }
+  document.getElementById("shopsModal").style.display = "flex";
+}
+
+function closeShopsModal() {
+  document.getElementById("shopsModal").style.display = "none";
+}
+
+/* تحديث قائمة المحلات في خانة الإضافة */
+function updateShopsDropdown() {
+  const select = document.getElementById("shopName");
+  select.innerHTML = '<option value="">اختر المحل...</option>';
+  if(dbData.shops) {
+    dbData.shops.forEach(sh => {
+      const opt = document.createElement("option");
+      opt.value = sh.name;
+      opt.textContent = sh.name;
+      select.append(opt);
+    });
+  }
+}
+
+/* إضافة محل جديد من لوحة التحكم */
+document.getElementById("addShopForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const name = document.getElementById("newShopName").value.trim();
+  const address = document.getElementById("newShopAddress").value.trim();
+  const mapUrl = document.getElementById("newShopMap").value.trim();
+
+  if(!name || !address || !mapUrl) return;
+
+  if(!dbData.shops) dbData.shops = [];
+  
+  const existing = dbData.shops.find(s => s.name.toLowerCase() === name.toLowerCase());
+  if(existing) {
+    existing.address = address;
+    existing.mapUrl = mapUrl;
+  } else {
+    dbData.shops.push({ name, address, mapUrl });
+  }
+
+  const saved = await saveDataToCloud();
+  if(saved) {
+    this.reset();
+    alert("تم إضافة وحفظ المحل بنجاح ✅");
+  }
+});
+
+/* فلترة الأقسام */
+function filterCategory(cat, btn){
+  currentCategory = cat;
+  document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  renderProducts();
+}
+
+/* واجهة العميل */
 function getCustomer(){
   try{ return JSON.parse(localStorage.getItem("mansouraCustomer"))||null; }
   catch(e){ return null; }
@@ -335,10 +470,8 @@ document.getElementById("customerForm").addEventListener("submit",function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
   const phone=document.getElementById("customerPhone").value.trim();
-
-  if(name.length<2){ alert("اكتب اسم صحيح (حرفين على الأقل)."); return; }
-  if(phone.replace(/\D/g,"").length<8){ alert("من فضلك اكتب رقم موبايل صحيح."); return; }
-
+  if(name.length<2){ alert("اكتب اسم صحيح."); return; }
+  if(phone.replace(/\D/g,"").length<8){ alert("اكتب رقم موبايل صحيح."); return; }
   localStorage.setItem("mansouraCustomer",JSON.stringify({name,phone}));
   sessionStorage.removeItem("mansouraLoggedOut");
   updateCustomerUI();
@@ -347,19 +480,17 @@ document.getElementById("customerForm").addEventListener("submit",function(e){
 });
 
 function customerLogout(){
-  if(!confirm("تسجيل الخروج؟ بياناتك هتفضل محفوظة وتقدر تدخل تاني."))return;
+  if(!confirm("تسجيل الخروج؟"))return;
   sessionStorage.setItem("mansouraLoggedOut","yes");
   updateCustomerUI();
   document.getElementById("menu").style.display="none";
 }
 
-/* القائمة */
 function toggleMenu(){
   const menu=document.getElementById("menu");
   menu.style.display=menu.style.display==="block"?"none":"block";
 }
 
-/* دخول المبرمج */
 function adminLogin(){
   const pass=prompt("ادخل باسورد المبرمج");
   if(pass===ADMIN_PASSWORD){
@@ -380,11 +511,22 @@ function renderProducts(){
   const box=document.getElementById("products");
   box.innerHTML="";
 
-  if(!products.length){
-    box.innerHTML='<p class="empty">لا توجد منتجات متاحة حالياً</p>';
+  const searchText = document.getElementById("search").value.toLowerCase();
+  const productsList = dbData.products || [];
+
+  const filtered = productsList.filter(p=>{
+    const matchesCat = (currentCategory === "الكل" || p.category === currentCategory);
+    const matchesSearch = (p.name.toLowerCase().includes(searchText) || p.shop.toLowerCase().includes(searchText));
+    return matchesCat && matchesSearch;
+  });
+
+  if(!filtered.length){
+    box.innerHTML='<p class="empty">لا توجد منتجات مطابقة في هذا القسم</p>';
+    updateDashboard();
+    return;
   }
 
-  products.forEach(p=>{
+  filtered.forEach(p=>{
     const card=document.createElement("div");
     card.className="card";
 
@@ -399,27 +541,23 @@ function renderProducts(){
     const s=document.createElement("p");
     s.className="shop";
     s.textContent="محل "+p.shop;
+    s.onclick = () => openShopsModal();
+
+    const sizes = document.createElement("div");
+    sizes.innerHTML = `<span class="sizes-badge">المقاسات: ${escapeHTML(p.sizes || "متاح")}</span>`;
 
     const price=document.createElement("p");
     price.className="price";
     price.textContent=Number(p.price).toLocaleString("ar-EG")+" جنيه";
 
-    card.append(img,h,s,price);
+    card.append(img,h,s,sizes,price);
     box.append(card);
   });
 
   updateDashboard();
-  applySearch();
 }
 
-function applySearch(){
-  const v=document.getElementById("search").value.toLowerCase();
-  document.querySelectorAll(".card").forEach(c=>{
-    c.style.display=c.innerText.toLowerCase().includes(v)?"block":"none";
-  });
-}
-
-document.getElementById("search").addEventListener("input",applySearch);
+document.getElementById("search").addEventListener("input",renderProducts);
 
 /* إضافة منتج */
 document.getElementById("addForm").addEventListener("submit",async function(e){
@@ -427,41 +565,45 @@ document.getElementById("addForm").addEventListener("submit",async function(e){
 
   const shop=document.getElementById("shopName").value.trim();
   const name=document.getElementById("productName").value.trim();
+  const category=document.getElementById("productCategory").value;
+  const sizes=document.getElementById("productSizes").value.trim();
   const price=Number(document.getElementById("productPrice").value);
   const image=document.getElementById("productImage").value.trim();
 
-  if(!shop||!name||!Number.isFinite(price)||price<=0){
+  if(!shop||!name||!sizes||!Number.isFinite(price)||price<=0){
     alert("من فضلك أدخل البيانات بشكل صحيح");
     return;
   }
 
-  await loadProducts();
+  if(!dbData.products) dbData.products = [];
 
-  products.push({
+  dbData.products.push({
     id:Date.now(),
     shop,
     name,
+    category,
+    sizes,
     price,
     image:image||"https://via.placeholder.com/400x300?text=Product"
   });
 
-  const saved = await saveProductsToCloud();
+  const saved = await saveDataToCloud();
   if(saved) {
     this.reset();
-    alert("تمت إضافة المنتج والمحل بنجاح وسيظهر للجميع فوراً ✅");
+    alert("تمت إضافة المنتج بنجاح للجميع ✅");
   }
 });
 
 /* تعديل المنتج */
 async function editProduct(id){
-  const p=products.find(x=>x.id===id);
+  const p=dbData.products.find(x=>x.id===id);
   if(!p)return;
-
-  let shop=prompt("تعديل اسم المحل:",p.shop);
-  if(shop===null)return;
 
   let name=prompt("تعديل اسم المنتج:",p.name);
   if(name===null)return;
+
+  let sizes=prompt("تعديل المقاسات:",p.sizes);
+  if(sizes===null)return;
 
   let price=prompt("تعديل السعر:",p.price);
   if(price===null)return;
@@ -469,53 +611,45 @@ async function editProduct(id){
   let image=prompt("تعديل رابط الصورة:",p.image);
   if(image===null)return;
 
-  shop=shop.trim();
-  name=name.trim();
-  price=Number(price);
-
-  if(!shop||!name||!Number.isFinite(price)||price<=0){
-    alert("البيانات غير صحيحة");
-    return;
-  }
-
-  p.shop=shop;
-  p.name=name;
-  p.price=price;
+  p.name=name.trim();
+  p.sizes=sizes.trim();
+  p.price=Number(price);
   p.image=image.trim()||p.image;
 
-  const saved = await saveProductsToCloud();
-  if(saved) alert("تم تعديل المنتج بنجاح للجميع ✅");
+  const saved = await saveDataToCloud();
+  if(saved) alert("تم تعديل المنتج بنجاح ✅");
 }
 
 /* حذف المنتج */
 async function deleteProduct(id){
-  if(!confirm("هل أنت متأكد من حذف المنتج؟ سيُحذف من عند الجميع."))return;
+  if(!confirm("هل أنت متأكد من حذف المنتج؟"))return;
 
-  await loadProducts();
-  products=products.filter(p=>p.id!==id);
+  dbData.products = dbData.products.filter(p=>p.id!==id);
 
-  const saved = await saveProductsToCloud();
+  const saved = await saveDataToCloud();
   if(saved) alert("تم الحذف بنجاح ✅");
 }
 
 /* تحديث لوحة التحكم */
 function updateDashboard(){
-  document.getElementById("totalProducts").textContent=products.length;
-  document.getElementById("totalShops").textContent=[...new Set(products.map(p=>p.shop))].length;
-  document.getElementById("lowestPrice").textContent=(products.length?Math.min(...products.map(p=>Number(p.price))):0)+" ج";
+  const prods = dbData.products || [];
+  document.getElementById("totalProducts").textContent = prods.length;
+  document.getElementById("totalShops").textContent = (dbData.shops || []).length;
+  document.getElementById("lowestPrice").textContent = (prods.length ? Math.min(...prods.map(p=>Number(p.price))) : 0) + " ج";
 
   const tbody=document.getElementById("adminProducts");
   tbody.innerHTML="";
 
-  if(!products.length){
-    tbody.innerHTML='<tr><td colspan="5" class="empty">لا توجد منتجات حتى الآن</td></tr>';
+  if(!prods.length){
+    tbody.innerHTML='<tr><td colspan="6" class="empty">لا توجد منتجات حتى الآن</td></tr>';
     return;
   }
 
-  products.forEach(p=>{
+  prods.forEach(p=>{
     const tr=document.createElement("tr");
     tr.innerHTML=`
     <td>${escapeHTML(p.name)}</td>
+    <td>${escapeHTML(p.category || "أخرى")}</td>
     <td>${escapeHTML(p.shop)}</td>
     <td>${Number(p.price)} ج</td>
     <td><button class="edit-btn" onclick="editProduct(${p.id})">تعديل</button></td>
@@ -526,7 +660,7 @@ function updateDashboard(){
 }
 
 // تشغيل الموقع
-loadProducts();
+loadData();
 updateCustomerUI();
 </script>
 </body>
