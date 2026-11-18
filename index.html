@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>مقارن أسعار ملابس المنصورة</title>
+<title id="pageTitle">مقارن أسعار ملابس المنصورة</title>
 
 <style>
 *{box-sizing:border-box}
@@ -12,88 +12,94 @@ header{background:#111827;color:white;padding:25px 15px;text-align:center}
 header h1{margin:0 0 8px}
 
 .search-section{text-align:center;padding:22px 15px 10px}
-input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outline:none}
-.search-section input{width:min(90%,400px)}
+input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15px;outline:none;width:100%;background:#f8fafc}
+.search-section input{width:min(90%,400px);background:#fff}
 
-/* شريط الأقسام */
-.categories-bar{display:flex;justify-content:center;gap:10px;padding:10px 15px 20px;flex-wrap:wrap}
+/* شريط الأقسام وأدوات الترتيب */
+.categories-container{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 15px 20px}
+.categories-bar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .cat-btn{background:white;border:1px solid #cbd5e1;padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:bold;color:#475569;transition:0.2s}
 .cat-btn.active, .cat-btn:hover{background:#4f46e5;color:white;border-color:#4f46e5}
 
+.sort-bar{display:flex;justify-content:center;gap:10px;margin-top:5px}
+.sort-btn{background:#e0e7ff;border:1px solid #c7d2fe;color:#3730a3;padding:7px 15px;border-radius:15px;cursor:pointer;font-weight:bold;font-size:13px;transition:0.2s}
+.sort-btn.active{background:#4f46e5;color:white;border-color:#4f46e5}
+
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;padding:20px;max-width:1200px;margin:auto}
-.card{background:white;padding:15px;border-radius:15px;box-shadow:0 3px 15px #0000000d;display:flex;flex-direction:column;justify-content:space-between}
+.card{background:white;padding:15px;border-radius:15px;box-shadow:0 3px 15px #0000000d;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:0.2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 5px 20px #00000014}
 .card img{width:100%;height:230px;object-fit:cover;border-radius:10px;background:#eee}
-.shop{color:#2563eb;font-weight:bold;margin:8px 0 4px;cursor:pointer}
-.shop:hover{text-decoration:underline}
+.card-content{padding:10px 0 0}
+.shop-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.shop{color:#2563eb;font-weight:bold}
+.map-btn-small{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:bold}
+.map-btn-small:hover{background:#dbeafe}
 .price{color:#059669;font-size:22px;font-weight:bold;margin:8px 0}
 .sizes-badge{background:#f1f5f9;color:#334155;padding:5px 10px;border-radius:6px;font-size:13px;display:inline-block;margin-top:5px}
 
 /* أزرار الهيدر العلوية */
 .top-buttons{position:fixed;top:15px;right:15px;display:flex;gap:8px;z-index:1000}
-.menu-btn, .shops-nav-btn{padding:10px 14px;font-size:18px;border:0;border-radius:10px;cursor:pointer;background:white;box-shadow:0 2px 10px #0002;font-weight:bold;color:#1e293b}
+.menu-btn, .shops-nav-btn, .lang-btn{padding:10px 14px;font-size:16px;border:0;border-radius:10px;cursor:pointer;background:white;box-shadow:0 2px 10px #0002;font-weight:bold;color:#1e293b}
+.lang-btn{background:#4f46e5;color:white}
 
 #menu{display:none;position:fixed;top:70px;right:15px;background:white;padding:12px;border-radius:12px;box-shadow:0 5px 25px #0003;z-index:1000;width:200px}
 #menu button{width:100%;margin:5px 0;padding:11px;border:0;border-radius:8px;background:#f1f5f9;cursor:pointer;font-size:14px}
 
-/* نافذة عرض المحلات وعناوينها */
-#shopsModal{display:none;position:fixed;inset:0;z-index:4500;background:#0f172aee;align-items:center;justify-content:center;padding:16px}
-.shops-modal-card{width:min(100%,500px);background:white;border-radius:22px;padding:25px;box-shadow:0 25px 80px #0005;max-height:80vh;overflow-y:auto}
-.shops-modal-card h2{margin-top:0;color:#1e293b}
-.shop-item-box{background:#f8fafc;border:1px solid #e2e8f0;padding:15px;border-radius:12px;margin-bottom:12px}
-.shop-item-box h3{margin:0 0 5px;color:#2563eb}
-.shop-item-box p{margin:0 0 10px;color:#64748b;font-size:14px}
-.map-link{display:inline-block;background:#059669;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold}
-.close-shops-modal{background:#ef4444;color:white;border:0;padding:10px;width:100%;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:15px}
+/* النوافذ المنبثقة */
+#productModal, #shopsModal, #shopProductsModal, #customerPanel, #adminPanel{display:none;position:fixed;inset:0;z-index:4500;background:#0f172aee;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
 
-/* واجهة العميل */
-#customerPanel{display:none;position:fixed;inset:0;z-index:4000;background:#0f172aee;align-items:center;justify-content:center;padding:16px}
-.customer-card{width:min(100%,430px);background:white;border-radius:22px;padding:28px;box-shadow:0 25px 80px #0005}
+.product-modal-card, .shops-modal-card, .shop-products-card, .customer-card{
+  width:min(100%,480px);
+  background:white;
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 25px 80px #0005;
+  max-height:90vh;
+  overflow-y:auto;
+  margin:auto;
+}
+
 .customer-icon{width:58px;height:58px;border-radius:18px;background:#ede9fe;color:#6d28d9;display:grid;place-items:center;font-size:28px;margin-bottom:16px}
-.customer-card h2{margin:0 0 8px}
-.hint{color:#64748b;line-height:1.7;font-size:14px;margin:0 0 22px}
+.customer-card h2{margin:0 0 8px;color:#1e293b}
+.hint{color:#64748b;line-height:1.7;font-size:14px;margin:0 0 20px}
 .customer-field{margin:15px 0}
-.customer-field label{display:block;font-weight:bold;font-size:14px;margin-bottom:7px}
-.customer-field input{width:100%;background:#f8fafc;padding:13px}
-.customer-actions{display:flex;gap:10px;margin-top:20px}
+.customer-field label{display:block;font-weight:bold;font-size:14px;margin-bottom:6px;color:#334155}
+.customer-actions{display:flex;gap:10px;margin-top:22px}
 .customer-actions button{flex:1;padding:12px;border:0;border-radius:10px;cursor:pointer;font-weight:bold}
 .save-customer{background:#4f46e5;color:white}
 .cancel-customer{background:#eef2f7;color:#334155}
-.customer-note{font-size:12px;color:#64748b;line-height:1.6;margin-top:15px}
-#customerGreeting{display:none;text-align:center;padding:12px;margin:0 auto 12px;background:#ede9fe;color:#5b21b6;border-radius:10px;max-width:500px}
+.customer-note{font-size:12px;color:#64748b;line-height:1.6;margin-top:14px}
+
+.product-modal-card img{width:100%;height:280px;object-fit:cover;border-radius:12px;background:#eee;margin-bottom:15px}
+.detail-row{margin:10px 0;font-size:15px;color:#475569}
+.detail-row span{font-weight:bold;color:#111827}
+.close-modal-btn{background:#ef4444;color:white;border:0;padding:12px;width:100%;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:20px}
+.map-link{display:inline-block;background:#059669;color:white;padding:10px 14px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;text-align:center;margin-top:8px}
+
+.shop-item-box{background:#f8fafc;border:1px solid #e2e8f0;padding:15px;border-radius:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.shop-item-top{display:flex;justify-content:space-between;align-items:center}
+.shop-products-btn{background:#4f46e5;color:white;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:bold;border:0;cursor:pointer}
+.mini-products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-top:15px}
+.mini-card{background:#f8fafc;border:1px solid #e2e8f0;padding:10px;border-radius:12px;cursor:pointer}
+.mini-card img{width:100%;height:140px;object-fit:cover;border-radius:8px;background:#eee}
 
 /* لوحة التحكم */
-#adminPanel{display:none;position:fixed;inset:0;z-index:5000;background:#f1f5f9;overflow:auto}
-.admin-header{background:#111827;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.admin-header h2{margin:0;font-size:22px}
-.close-btn{background:#ef4444;color:white;border:0;padding:10px 16px;border-radius:9px;cursor:pointer}
+#adminPanel{z-index:5000;background:#f1f5f9;overflow:auto;display:none;padding:0}
+.admin-header{background:#111827;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center}
 .admin-container{max-width:1150px;margin:25px auto;padding:0 18px}
-.welcome{margin-bottom:22px}
-.welcome h2{margin-bottom:5px}
-.welcome p{color:#64748b;margin:0}
 .dashboard-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
 .stat-card{background:white;padding:20px;border-radius:14px;box-shadow:0 3px 12px #00000008;border-right:4px solid #6366f1}
-.stat-card small{color:#64748b}
-.stat-card h2{margin:10px 0 0;font-size:28px}
 .admin-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.4fr);gap:20px;align-items:start;margin-bottom:25px}
 .admin-box{background:white;padding:22px;border-radius:15px;box-shadow:0 3px 15px #0000000a}
-.admin-box h3{margin-top:0}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;margin-bottom:7px;font-weight:bold;font-size:14px}
-.form-group input, .form-group select{width:100%;background:#f8fafc}
 .primary-btn{background:#4f46e5;color:white;border:0;padding:12px;width:100%;border-radius:9px;font-size:15px;font-weight:bold;cursor:pointer}
-.primary-btn:disabled{background:#94a3b8;cursor:not-allowed}
 .products-table{width:100%;border-collapse:collapse;font-size:13px}
 .products-table th,.products-table td{padding:12px 8px;border-bottom:1px solid #eee;text-align:right}
 .products-table th{background:#f8fafc;color:#64748b}
 .delete-btn{background:#fee2e2;color:#dc2626;border:0;padding:7px 10px;border-radius:7px;cursor:pointer}
 .edit-btn{background:#dbeafe;color:#2563eb;border:0;padding:7px 10px;border-radius:7px;cursor:pointer}
 .empty{text-align:center;color:#94a3b8;padding:20px}
-
-@media(max-width:750px){
-.admin-grid{grid-template-columns:1fr}
-.products-table{font-size:11px}
-.products-table th,.products-table td{padding:9px 4px}
-}
 </style>
 </head>
 
@@ -101,47 +107,65 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 
 <!-- الأزرار العلوية -->
 <div class="top-buttons">
-<button class="shops-nav-btn" onclick="openShopsModal()">🏪 المحلات</button>
+<button class="lang-btn" onclick="toggleLanguage()" id="langBtn">English 🌐</button>
+<button class="shops-nav-btn" onclick="openShopsModal()" id="shopsNavText">🏪 المحلات</button>
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 </div>
 
 <div id="menu">
 <button id="customerMenuBtn" onclick="customerLogin()">👤 تسجيل دخول كعميل</button>
-<button onclick="adminLogin()">🛠️ تسجيل دخول كمبرمج</button>
-<button id="customerLogoutBtn" onclick="customerLogout()" style="display:none">🚪 تسجيل خروج العميل</button>
+<button id="customerLogoutBtn" onclick="customerLogout()" style="display:none">🚪 تسجيل خروج</button>
 </div>
 
 <header>
-<h1>👕 مقارنة أسعار الملابس في المنصورة</h1>
-<p>اعرف أرخص سعر قبل ما تشتري</p>
+<h1 id="mainTitle">👕 مقارنة أسعار الملابس في المنصورة</h1>
+<p id="mainSubtitle">اعرف أرخص سعر قبل ما تشتري</p>
 </header>
 
 <div id="customerGreeting"></div>
 
-<!-- نافذة عرض جميع المحلات وعناوينها وروابط الخرائط -->
+<!-- نافذة تفاصيل المنتج -->
+<div id="productModal">
+<div class="product-modal-card" id="productModalContent"></div>
+</div>
+
+<!-- نافذة المحلات -->
 <div id="shopsModal">
 <div class="shops-modal-card">
-<h2>🏪 دليل المحلات وعناوينها</h2>
-<p style="color:#64748b;font-size:13px;margin-bottom:15px">اضغط على زر خريطة جوجل للوصول لمقر المحل مباشرة.</p>
-<div id="shopsListContainer">
-<p class="empty">جاري تحميل المحلات...</p>
-</div>
-<button class="close-shops-modal" onclick="closeShopsModal()">إغلاق النافذة</button>
+<h2 id="shopsModalTitle">🏪 دليل المحلات وعناوينها</h2>
+<p id="shopsModalDesc" style="color:#64748b;font-size:13px;margin-bottom:15px">اضغط على الموقع أو كلمة المنتجات لعرض قطع المحل.</p>
+<div id="shopsListContainer"><p class="empty">جاري تحميل المحلات...</p></div>
+<button class="close-modal-btn" onclick="closeShopsModal()" id="closeShopsText">إغلاق النافذة</button>
 </div>
 </div>
 
-<!-- شريط البحث والأقسام -->
+<!-- نافذة منتجات محل معين -->
+<div id="shopProductsModal">
+<div class="shop-products-card">
+<h2 id="shopProductsTitle">منتجات المحل</h2>
+<div id="shopProductsContainer" class="mini-products-grid"></div>
+<button class="close-modal-btn" onclick="closeShopProductsModal()" style="margin-top:20px" id="closeShopProdText">إغلاق</button>
+</div>
+</div>
+
+<!-- شريط البحث والأقسام والترتيب -->
 <div class="search-section">
 <input type="text" id="search" placeholder="ابحث عن منتج أو محل...">
 </div>
 
+<div class="categories-container">
 <div class="categories-bar" id="categoriesBar">
-<button class="cat-btn active" onclick="filterCategory('الكل', this)">الكل</button>
-<button class="cat-btn" onclick="filterCategory('بنطلون', this)">👖 بنطلونات</button>
-<button class="cat-btn" onclick="filterCategory('هودي', this)">🧥 هودي</button>
-<button class="cat-btn" onclick="filterCategory('تيشرت', this)">👕 تيشرتات</button>
-<button class="cat-btn" onclick="filterCategory('جاكيت', this)">🧥 جواكيت</button>
-<button class="cat-btn" onclick="filterCategory('أخرى', this)">✨ أخرى</button>
+<button class="cat-btn active" onclick="filterCategory('الكل', this)" data-cat="الكل">الكل</button>
+<button class="cat-btn" onclick="filterCategory('بنطلون', this)" data-cat="بنطلون">👖 بنطلونات</button>
+<button class="cat-btn" onclick="filterCategory('هودي', this)" data-cat="هودي">🧥 هودي</button>
+<button class="cat-btn" onclick="filterCategory('تيشرت', this)" data-cat="تيشرت">تيشرتات 👕</button>
+<button class="cat-btn" onclick="filterCategory('جاكيت', this)" data-cat="جاكيت">🧥 جواكيت</button>
+<button class="cat-btn" onclick="filterCategory('أخرى', this)" data-cat="أخرى">✨ أخرى</button>
+</div>
+
+<div class="sort-bar">
+<button class="sort-btn" id="sortPriceBtn" onclick="togglePriceSort()">💰 ترتيب حسب السعر: الافتراضي</button>
+</div>
 </div>
 
 <div class="products" id="products">
@@ -152,161 +176,220 @@ input, select{padding:12px;border-radius:9px;border:1px solid #ddd;font-size:15p
 <div id="customerPanel">
 <div class="customer-card">
 <div class="customer-icon">👤</div>
-<h2 id="customerTitle">أهلاً بيك في موقعنا</h2>
-<p class="hint">سجّل بياناتك عشان نقدر نرحب بيك في كل مرة تزور فيها الموقع.</p>
+<h2 id="custTitle">تسجيل الدخول</h2>
+<p id="custHint" class="hint">أدخل بياناتك لحفظ حسابك ومتابعة أحدث العروض والأسعار.</p>
 <form id="customerForm">
 <div class="customer-field">
-<label for="customerName">الاسم</label>
+<label id="labelName">الاسم</label>
 <input id="customerName" type="text" maxlength="60" placeholder="اكتب اسمك" required>
 </div>
 <div class="customer-field">
-<label for="customerPhone">رقم الموبايل</label>
+<label id="labelPhone">رقم الموبايل</label>
 <input id="customerPhone" type="tel" inputmode="tel" maxlength="20" placeholder="مثال: 01012345678" required>
 </div>
+<div class="customer-field">
+<label id="labelPass">كلمة المرور</label>
+<input id="customerPassword" type="password" placeholder="أدخل كلمة المرور" required>
+</div>
 <div class="customer-actions">
-<button class="save-customer" type="submit">حفظ البيانات</button>
-<button class="cancel-customer" type="button" onclick="closeCustomerPanel()">إلغاء</button>
+<button class="save-customer" type="submit" id="saveCustBtn">دخول وحفظ</button>
+<button class="cancel-customer" type="button" onclick="closeCustomerPanel()" id="cancelCustBtn">إلغاء</button>
 </div>
 </form>
-<p class="customer-note">بياناتك بتتحفظ على نفس المتصفح والجهاز فقط.</p>
+<p class="customer-note">بياناتك محفوظة بأمان على جهازك.</p>
 </div>
 </div>
 
 <!-- لوحة التحكم -->
 <div id="adminPanel">
-
 <div class="admin-header">
 <h2>🛠️ لوحة تحكم المتجر</h2>
 <button class="close-btn" onclick="closeAdmin()">إغلاق ✕</button>
 </div>
-
 <div class="admin-container">
-
-<div class="welcome">
-<h2>أهلاً بك يا مدير الموقع 👋</h2>
-<p>تحكم بإضافة المحلات وعناوينها وروابط الخرائط، وإضافة المنتجات بمقاساتها للجميع.</p>
-</div>
-
 <div class="dashboard-stats">
-<div class="stat-card">
-<small>إجمالي المنتجات</small>
-<h2 id="totalProducts">0</h2>
-</div>
-<div class="stat-card">
-<small>عدد المحلات</small>
-<h2 id="totalShops">0</h2>
-</div>
-<div class="stat-card">
-<small>أقل سعر</small>
-<h2 id="lowestPrice">0</h2>
-</div>
+<div class="stat-card"><small>إجمالي المنتجات</small><h2 id="totalProducts">0</h2></div>
+<div class="stat-card"><small>عدد المحلات</small><h2 id="totalShops">0</h2></div>
+<div class="stat-card"><small>إجمالي العملاء المسجلين</small><h2 id="totalCustomers">0</h2></div>
 </div>
 
 <div class="admin-grid">
-
-<!-- نموذج إضافة محل جديد -->
 <div class="admin-box">
 <h3>🏪 إضافة محل جديد وعنوانه</h3>
 <form id="addShopForm">
-<div class="form-group">
-<label>اسم المحل</label>
-<input id="newShopName" type="text" placeholder="مثال: Fashion Store" required>
-</div>
-<div class="form-group">
-<label>عنوان المحل بالتفصيل</label>
-<input id="newShopAddress" type="text" placeholder="مثال: المنصورة، شارع الجلاء" required>
-</div>
-<div class="form-group">
-<label>رابط خريطة جوجل (Google Maps URL)</label>
-<input id="newShopMap" type="url" placeholder="https://maps.app.goo.gl/..." required>
-</div>
-<button class="primary-btn" type="submit">حفظ وإضافة المحل</button>
+<div class="form-group"><label>اسم المحل</label><input id="newShopName" type="text" placeholder="Fashion Store" required></div>
+<div class="form-group"><label>عنوان المحل بالتفصيل</label><input id="newShopAddress" type="text" placeholder="المنصورة، شارع الجلاء" required></div>
+<div class="form-group"><label>رابط جوجل ماب</label><input id="newShopMap" type="url" placeholder="https://maps.app.goo.gl/..." required></div>
+<button class="primary-btn" type="submit">حفظ المحل</button>
 </form>
 </div>
 
-<!-- نموذج إضافة منتج -->
 <div class="admin-box">
 <h3>➕ إضافة منتج جديد</h3>
 <form id="addForm">
-<div class="form-group">
-<label>اختر المحل</label>
-<select id="shopName" required>
-<option value="">اختر المحل أولاً...</option>
-</select>
-</div>
-<div class="form-group">
-<label>اسم المنتج</label>
-<input id="productName" type="text" placeholder="مثال: بنطلون جينز واسع" required>
-</div>
-<div class="form-group">
-<label>القسم</label>
+<div class="form-group"><label>اختر المحل</label><select id="shopName" required><option value="">اختر...</option></select></div>
+<div class="form-group"><label>اسم المنتج</label><input id="productName" type="text" placeholder="بنطلون جينز" required></div>
+<div class="form-group"><label>القسم</label>
 <select id="productCategory" required>
 <option value="بنطلون">بنطلون</option>
 <option value="هودي">هودي</option>
 <option value="تيشرت">تيشرت</option>
 <option value="جاكيت">جاكيت</option>
 <option value="أخرى">أخرى</option>
-</select>
-</div>
-<div class="form-group">
-<label>المقاسات المتاحة</label>
-<input id="productSizes" type="text" placeholder="مثال: S, M, L, XL أو 30, 32" required>
-</div>
-<div class="form-group">
-<label>السعر بالجنيه</label>
-<input id="productPrice" type="number" min="1" placeholder="مثال: 450" required>
-</div>
-<div class="form-group">
-<label>رابط صورة المنتج (اختياري)</label>
-<input id="productImage" type="url" placeholder="https://example.com/image.jpg">
-</div>
-<button class="primary-btn" id="submitBtn" type="submit">إضافة المنتج</button>
+</select></div>
+<div class="form-group"><label>المقاسات</label><input id="productSizes" type="text" placeholder="S, M, L, XL" required></div>
+<div class="form-group"><label>السعر (جنيه)</label><input id="productPrice" type="number" min="1" placeholder="450" required></div>
+<div class="form-group"><label>رابط الصورة</label><input id="productImage" type="url" placeholder="https://..."></div>
+<div class="form-group"><label>رابط ماب للمنتج (اختياري)</label><input id="productMapUrl" type="url" placeholder="https://..."></div>
+<button class="primary-btn" type="submit">إضافة المنتج</button>
 </form>
 </div>
-
 </div>
 
-<!-- جدول إدارة المنتجات -->
-<div class="admin-box" style="margin-bottom:30px">
-<h3>📦 إدارة المنتجات</h3>
+<!-- جدول إدارة العملاء المسجلين المستقل -->
+<div class="admin-box" style="margin-bottom:20px">
+<h3>👥 قائمة العملاء المسجلين في الموقع</h3>
 <div style="overflow-x:auto">
 <table class="products-table">
 <thead>
-<tr>
-<th>المنتج</th>
-<th>القسم</th>
-<th>المحل</th>
-<th>السعر</th>
-<th>تعديل</th>
-<th>حذف</th>
-</tr>
+<tr><th>اسم العميل</th><th>رقم الموبايل</th><th>تاريخ التسجيل</th><th>حذف</th></tr>
 </thead>
-<tbody id="adminProducts"></tbody>
+<tbody id="adminCustomers"></tbody>
 </table>
 </div>
 </div>
 
+<div class="admin-box" style="margin-bottom:20px">
+<h3>🏪 إدارة المحلات</h3>
+<div style="overflow-x:auto"><table class="products-table"><thead><tr><th>المحل</th><th>العنوان</th><th>خريطة</th><th>تعديل</th><th>حذف</th></tr></thead><tbody id="adminShops"></tbody></table></div>
+</div>
+
+<div class="admin-box" style="margin-bottom:30px">
+<h3>📦 إدارة المنتجات</h3>
+<div style="overflow-x:auto"><table class="products-table"><thead><tr><th>المنتج</th><th>القسم</th><th>المحل</th><th>السعر</th><th>تعديل</th><th>حذف</th></tr></thead><tbody id="adminProducts"></tbody></table></div>
+</div>
 </div>
 </div>
 
 <script>
 const ADMIN_PASSWORD = "Mo2Mo2Sh2Mo2";
-
-// === إعدادات JSONBin السحابية ===
-const BIN_ID = "6afcee94ac6210605a902930";
 const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q";
-// ===================================
 
-let dbData = {
-  products: [],
-  shops: []
-};
+// جداول JSONBin المستقلة تماماً
+const PRODUCTS_BIN_ID = "6afcee94ac6210605a902930";
+const CUSTOMERS_BIN_ID = "6afe14eac6210605a9300fa";
+
+let dbData = { products: [], shops: [] };
+let customersData = { customers: [] };
 let currentCategory = "الكل";
+let sortByPriceAsc = false;
+let currentLang = "ar";
 
-// جلب البيانات من السحابة
-async function loadData() {
+const translations = {
+  ar: {
+    title: "مقارن أسعار ملابس المنصورة",
+    subtitle: "اعرف أرخص سعر قبل ما تشتري",
+    searchPlaceholder: "ابحث عن منتج أو محل...",
+    shopsNav: "🏪 المحلات",
+    customerLogin: "👤 تسجيل دخول كعميل",
+    customerLogout: "🚪 تسجيل خروج",
+    allCat: "الكل",
+    pantsCat: "👖 بنطلونات",
+    hoodieCat: "🧥 هودي",
+    tshirtCat: "تيشرتات 👕",
+    jacketCat: "🧥 جواكيت",
+    otherCat: "✨ أخرى",
+    sortDefault: "💰 ترتيب حسب السعر: الافتراضي",
+    sortAsc: "💰 ترتيب السعر: من الأقل للأكثر ⬆️",
+    shopsTitle: "🏪 دليل المحلات وعناوينها",
+    shopsDesc: "اضغط على الموقع أو كلمة المنتجات لعرض قطع المحل.",
+    close: "إغلاق النافذة",
+    productsWord: "📦 المنتجات",
+    mapBtn: "📍 الخريطة",
+    sizesLabel: "المقاسات: ",
+    priceUnit: " جنيه",
+    adminTitle: "🛠️ لوحة تحكم المتجر"
+  },
+  en: {
+    title: "Mansoura Clothes Price Comparison",
+    subtitle: "Find the cheapest price before buying",
+    searchPlaceholder: "Search for product or shop...",
+    shopsNav: "🏪 Shops",
+    customerLogin: "👤 Customer Login",
+    customerLogout: "🚪 Logout",
+    allCat: "All",
+    pantsCat: "👖 Pants",
+    hoodieCat: "🧥 Hoodies",
+    tshirtCat: "👕 T-Shirts",
+    jacketCat: "🧥 Jackets",
+    otherCat: "✨ Other",
+    sortDefault: "💰 Sort by Price: Default",
+    sortAsc: "💰 Price Sort: Low to High ⬆️",
+    shopsTitle: "🏪 Shops Directory",
+    shopsDesc: "Click on location or products to view items.",
+    close: "Close Window",
+    productsWord: "📦 Products",
+    mapBtn: "📍 Map",
+    sizesLabel: "Sizes: ",
+    priceUnit: " EGP",
+    adminTitle: "🛠️ Admin Dashboard"
+  }
+};
+
+function toggleLanguage() {
+  currentLang = currentLang === "ar" ? "en" : "ar";
+  const htmlRoot = document.getElementById("htmlRoot");
+  htmlRoot.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
+  htmlRoot.setAttribute("lang", currentLang);
+  document.getElementById("langBtn").textContent = currentLang === "ar" ? "English 🌐" : "عربي 🌐";
+  updateTexts();
+  renderProducts();
+}
+
+function updateTexts() {
+  const t = translations[currentLang];
+  document.getElementById("pageTitle").textContent = t.title;
+  document.getElementById("mainTitle").textContent = t.title;
+  document.getElementById("mainSubtitle").textContent = t.subtitle;
+  document.getElementById("search").placeholder = t.searchPlaceholder;
+  document.getElementById("shopsNavText").textContent = t.shopsNav;
+  document.getElementById("shopsModalTitle").textContent = t.shopsTitle;
+  document.getElementById("shopsModalDesc").textContent = t.shopsDesc;
+  document.getElementById("closeShopsText").textContent = t.close;
+  
+  const btns = document.querySelectorAll(".cat-btn");
+  if(btns.length >= 6) {
+    btns[0].textContent = t.allCat;
+    btns[1].textContent = t.pantsCat;
+    btns[2].textContent = t.hoodieCat;
+    btns[3].textContent = t.tshirtCat;
+    btns[4].textContent = t.jacketCat;
+    btns[5].textContent = t.otherCat;
+  }
+  
+  const sortBtn = document.getElementById("sortPriceBtn");
+  sortBtn.textContent = sortByPriceAsc ? t.sortAsc : t.sortDefault;
+  updateCustomerUI();
+}
+
+function togglePriceSort() {
+  sortByPriceAsc = !sortByPriceAsc;
+  const t = translations[currentLang];
+  const sortBtn = document.getElementById("sortPriceBtn");
+  if(sortByPriceAsc) {
+    sortBtn.textContent = t.sortAsc;
+    sortBtn.classList.add("active");
+  } else {
+    sortBtn.textContent = t.sortDefault;
+    sortBtn.classList.remove("active");
+  }
+  renderProducts();
+}
+
+/* جلب بيانات المنتجات والمحلات */
+async function loadProductsData() {
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${PRODUCTS_BIN_ID}/latest`, {
       headers: { "X-Master-Key": MASTER_KEY }
     });
     if (!res.ok) throw new Error("فشل التحميل");
@@ -315,39 +398,64 @@ async function loadData() {
     if (Array.isArray(data.record)) {
       dbData.products = data.record;
       dbData.shops = [...new Set(data.record.map(p => p.shop))].map(s => ({
-        name: s,
-        address: "المنصورة",
-        mapUrl: "https://maps.google.com"
+        name: s, address: "المنصورة", mapUrl: "https://maps.google.com"
       }));
     } else {
       dbData = data.record || { products: [], shops: [] };
     }
-    
     renderProducts();
     updateShopsDropdown();
+    updateDashboard();
   } catch (err) {
     console.error(err);
-    document.getElementById("products").innerHTML = `<p class="empty" style="color:red;">حدث خطأ في تحميل البيانات من السحابة.</p>`;
   }
 }
 
-// حفظ البيانات في السحابة
-async function saveDataToCloud() {
+/* جلب بيانات العملاء من البين المستقل */
+async function loadCustomersData() {
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}/latest`, {
+      headers: { "X-Master-Key": MASTER_KEY }
+    });
+    if (!res.ok) throw new Error("فشل تحميل العملاء");
+    const data = await res.json();
+    customersData = data.record || { customers: [] };
+    if(!customersData.customers) customersData.customers = [];
+    updateDashboard();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveProductsToCloud() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${PRODUCTS_BIN_ID}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": MASTER_KEY
-      },
+      headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
       body: JSON.stringify(dbData)
     });
     if (!res.ok) throw new Error("فشل الحفظ");
     renderProducts();
     updateShopsDropdown();
+    updateDashboard();
     return true;
   } catch (err) {
-    alert("حدث خطأ أثناء الحفظ بالسحابة.");
+    alert("خطأ في الحفظ السحابي للمنتجات.");
+    return false;
+  }
+}
+
+async function saveCustomersToCloud() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CUSTOMERS_BIN_ID}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
+      body: JSON.stringify(customersData)
+    });
+    if (!res.ok) throw new Error("فشل حفظ العملاء");
+    updateDashboard();
+    return true;
+  } catch (err) {
     console.error(err);
     return false;
   }
@@ -359,21 +467,85 @@ function escapeHTML(v){
   }[c]));
 }
 
-/* نافذة المحلات */
+function openProductModal(productId) {
+  const p = dbData.products.find(x => x.id === productId);
+  if (!p) return;
+  const shopObj = (dbData.shops || []).find(s => s.name === p.shop) || { address: "غير محدد", mapUrl: "#" };
+  const finalMapUrl = p.mapUrl || shopObj.mapUrl;
+  const t = translations[currentLang];
+
+  const content = document.getElementById("productModalContent");
+  content.innerHTML = `
+    <img src="${p.image || 'https://via.placeholder.com/400x300?text=Product'}" alt="${escapeHTML(p.name)}">
+    <h2>${escapeHTML(p.name)}</h2>
+    <div class="detail-row">${currentLang==='ar'?'القسم':'Category'}: <span>${escapeHTML(p.category || "-")}</span></div>
+    <div class="detail-row">${currentLang==='ar'?'السعر':'Price'}: <span style="color:#059669;font-size:20px">${Number(p.price).toLocaleString("ar-EG")}${t.priceUnit}</span></div>
+    <div class="detail-row">${t.sizesLabel}<span>${escapeHTML(p.sizes || "متاح")}</span></div>
+    <div class="detail-row">${currentLang==='ar'?'المحل':'Shop'}: <span>${escapeHTML(p.shop)}</span></div>
+    <div class="detail-row">${currentLang==='ar'?'العنوان':'Address'}: <span>${escapeHTML(shopObj.address)}</span></div>
+    <div style="margin-top:15px"><a href="${finalMapUrl}" target="_blank" class="map-link" style="display:block">📍 ${currentLang==='ar'?'افتح الموقع على جوجل ماب':'Open on Google Maps'}</a></div>
+    <button class="close-modal-btn" onclick="closeProductModal()">${t.close}</button>
+  `;
+  document.getElementById("productModal").style.display = "flex";
+}
+
+function closeProductModal() { document.getElementById("productModal").style.display = "none"; }
+
+function openShopProducts(shopName) {
+  closeShopsModal();
+  const container = document.getElementById("shopProductsContainer");
+  document.getElementById("shopProductsTitle").textContent = `${currentLang==='ar'?'منتجات المحل':'Shop Products'}: ${shopName}`;
+  container.innerHTML = "";
+
+  const storeProducts = (dbData.products || []).filter(p => p.shop === shopName);
+  if(!storeProducts.length) {
+    container.innerHTML = `<p class="empty" style="grid-column:1/-1">${currentLang==='ar'?'لا توجد منتجات مرفوعة لهذا المحل':'No products for this shop'}</p>`;
+  } else {
+    storeProducts.forEach(p => {
+      const miniCard = document.createElement("div");
+      miniCard.className = "mini-card";
+      miniCard.onclick = () => { closeShopProductsModal(); openProductModal(p.id); };
+      const t = translations[currentLang];
+      miniCard.innerHTML = `
+        <img src="${p.image || 'https://via.placeholder.com/400x300?text=Product'}">
+        <h4 style="margin:8px 0 4px;font-size:15px">${escapeHTML(p.name)}</h4>
+        <p style="margin:0;color:#059669;font-weight:bold">${Number(p.price).toLocaleString("ar-EG")}${t.priceUnit}</p>
+      `;
+      container.append(miniCard);
+    });
+  }
+  document.getElementById("shopProductsModal").style.display = "flex";
+}
+
+function closeShopProductsModal() { document.getElementById("shopProductsModal").style.display = "none"; }
+
+function openShopMapDirect(productId, event) {
+  event.stopPropagation();
+  const p = dbData.products.find(x => x.id === productId);
+  if(!p) return;
+  const shopObj = (dbData.shops || []).find(s => s.name === p.shop);
+  const finalMapUrl = p.mapUrl || (shopObj ? shopObj.mapUrl : "#");
+  if (finalMapUrl && finalMapUrl !== "#") window.open(finalMapUrl, '_blank');
+  else alert("Map link not available.");
+}
+
 function openShopsModal() {
   const container = document.getElementById("shopsListContainer");
   container.innerHTML = "";
-  
+  const t = translations[currentLang];
   if(!dbData.shops || !dbData.shops.length) {
-    container.innerHTML = '<p class="empty">لا توجد محلات مسجلة حتى الآن</p>';
+    container.innerHTML = `<p class="empty">${currentLang==='ar'?'لا توجد محلات مسجلة':'No registered shops'}</p>`;
   } else {
     dbData.shops.forEach(sh => {
       const box = document.createElement("div");
       box.className = "shop-item-box";
       box.innerHTML = `
-        <h3>${escapeHTML(sh.name)}</h3>
-        <p>📍 العنوان: ${escapeHTML(sh.address || "غير محدد")}</p>
-        <a href="${sh.mapUrl || '#'}" target="_blank" class="map-link">📍 افتح الموقع على جوجل ماب</a>
+        <div class="shop-item-top">
+          <h3>${escapeHTML(sh.name)}</h3>
+          <button class="shop-products-btn" onclick="openShopProducts('${escapeHTML(sh.name)}')">${t.productsWord}</button>
+        </div>
+        <p style="margin:0;color:#64748b;font-size:14px">📍 ${escapeHTML(sh.address || "-")}</p>
+        <a href="${sh.mapUrl || '#'}" target="_blank" class="map-link" style="margin-top:0;padding:6px 12px;font-size:12px">📍 Google Maps</a>
       `;
       container.append(box);
     });
@@ -381,11 +553,8 @@ function openShopsModal() {
   document.getElementById("shopsModal").style.display = "flex";
 }
 
-function closeShopsModal() {
-  document.getElementById("shopsModal").style.display = "none";
-}
+function closeShopsModal() { document.getElementById("shopsModal").style.display = "none"; }
 
-/* تحديث قائمة المحلات في خانة الإضافة */
 function updateShopsDropdown() {
   const select = document.getElementById("shopName");
   select.innerHTML = '<option value="">اختر المحل...</option>';
@@ -399,33 +568,48 @@ function updateShopsDropdown() {
   }
 }
 
-/* إضافة محل جديد من لوحة التحكم */
 document.getElementById("addShopForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name = document.getElementById("newShopName").value.trim();
   const address = document.getElementById("newShopAddress").value.trim();
   const mapUrl = document.getElementById("newShopMap").value.trim();
-
   if(!name || !address || !mapUrl) return;
-
   if(!dbData.shops) dbData.shops = [];
-  
   const existing = dbData.shops.find(s => s.name.toLowerCase() === name.toLowerCase());
-  if(existing) {
-    existing.address = address;
-    existing.mapUrl = mapUrl;
-  } else {
-    dbData.shops.push({ name, address, mapUrl });
-  }
-
-  const saved = await saveDataToCloud();
-  if(saved) {
-    this.reset();
-    alert("تم إضافة وحفظ المحل بنجاح ✅");
-  }
+  if(existing) { existing.address = address; existing.mapUrl = mapUrl; }
+  else { dbData.shops.push({ name, address, mapUrl }); }
+  if(await saveProductsToCloud()) { this.reset(); alert("Saved successfully ✅"); }
 });
 
-/* فلترة الأقسام */
+async function editShop(index) {
+  const sh = dbData.shops[index];
+  if(!sh) return;
+  let newName = prompt("Shop Name:", sh.name); if(newName===null)return;
+  let newAddress = prompt("Address:", sh.address); if(newAddress===null)return;
+  let newMap = prompt("Map URL:", sh.mapUrl); if(newMap===null)return;
+  const oldName = sh.name;
+  sh.name = newName.trim(); sh.address = newAddress.trim(); sh.mapUrl = newMap.trim();
+  if(oldName !== newName && dbData.products) {
+    dbData.products.forEach(p => { if(p.shop === oldName) p.shop = sh.name; });
+  }
+  if(await saveProductsToCloud()) alert("Updated successfully ✅");
+}
+
+async function deleteShop(index) {
+  const sh = dbData.shops[index];
+  if(!sh || !confirm(`Delete shop "${sh.name}"?`)) return;
+  dbData.shops.splice(index, 1);
+  if(await saveProductsToCloud()) alert("Deleted successfully ✅");
+}
+
+/* حذف عميل من جدول العملاء المستقل */
+async function deleteCustomer(index) {
+  if(!confirm("هل أنت متأكد من حذف هذا العميل؟")) return;
+  if(!customersData.customers) customersData.customers = [];
+  customersData.customers.splice(index, 1);
+  if(await saveCustomersToCloud()) alert("تم حذف العميل بنجاح ✅");
+}
+
 function filterCategory(cat, btn){
   currentCategory = cat;
   document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("active"));
@@ -433,55 +617,78 @@ function filterCategory(cat, btn){
   renderProducts();
 }
 
-/* واجهة العميل */
 function getCustomer(){
-  try{ return JSON.parse(localStorage.getItem("mansouraCustomer"))||null; }
-  catch(e){ return null; }
+  try{ return JSON.parse(localStorage.getItem("mansouraCustomer"))||null; }catch(e){return null;}
 }
 
 function updateCustomerUI(){
-  const customer=getCustomer();
-  const greeting=document.getElementById("customerGreeting");
-  document.getElementById("customerMenuBtn").textContent = customer?"👤 حسابي":"👤 تسجيل دخول كعميل";
-  document.getElementById("customerLogoutBtn").style.display = customer?"block":"none";
+  const customer = getCustomer();
+  const greeting = document.getElementById("customerGreeting");
+  const menuBtn = document.getElementById("customerMenuBtn");
+  const logoutBtn = document.getElementById("customerLogoutBtn");
+  const t = translations[currentLang];
 
-  if(customer&&!sessionStorage.getItem("mansouraLoggedOut")){
-    greeting.textContent=`أهلاً بيك يا ${customer.name} 👋`;
-    greeting.style.display="block";
-  }else{
-    greeting.style.display="none";
+  if(customer) {
+    menuBtn.textContent = `👤 ${customer.name}`;
+    logoutBtn.style.display = "block";
+    logoutBtn.textContent = t.customerLogout;
+    greeting.textContent = `أهلاً بيك يا ${customer.name} 👋`;
+    greeting.style.display = "block";
+  } else {
+    menuBtn.textContent = t.customerLogin;
+    logoutBtn.style.display = "none";
+    greeting.style.display = "none";
   }
 }
 
 function customerLogin(){
   document.getElementById("menu").style.display="none";
   const customer=getCustomer();
-  document.getElementById("customerTitle").textContent = customer?"تعديل بيانات حسابك":"أهلاً بيك في موقعنا";
-  document.getElementById("customerName").value=customer?.name||"";
-  document.getElementById("customerPhone").value=customer?.phone||"";
+  if(customer) { alert(`Welcome ${customer.name}`); return; }
   document.getElementById("customerPanel").style.display="flex";
 }
 
-function closeCustomerPanel(){
-  document.getElementById("customerPanel").style.display="none";
-}
+function closeCustomerPanel(){ document.getElementById("customerPanel").style.display="none"; }
 
-document.getElementById("customerForm").addEventListener("submit",function(e){
+document.getElementById("customerForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
   const phone=document.getElementById("customerPhone").value.trim();
-  if(name.length<2){ alert("اكتب اسم صحيح."); return; }
-  if(phone.replace(/\D/g,"").length<8){ alert("اكتب رقم موبايل صحيح."); return; }
-  localStorage.setItem("mansouraCustomer",JSON.stringify({name,phone}));
-  sessionStorage.removeItem("mansouraLoggedOut");
+  const password=document.getElementById("customerPassword").value;
+
+  if(password === ADMIN_PASSWORD){
+    closeCustomerPanel();
+    document.getElementById("adminPanel").style.display="block";
+    updateDashboard();
+    return;
+  }
+  if(name.length<2 || phone.replace(/\D/g,"").length<8 || password.length<4){
+    alert("Please enter valid data."); return;
+  }
+
+  // حفظ محلياً
+  localStorage.setItem("mansouraCustomer", JSON.stringify({name, phone}));
+
+  // رفع وحفظ بيانات العميل في جدول العملاء المستقل السحابي
+  if(!customersData.customers) customersData.customers = [];
+  const existingCust = customersData.customers.find(c => c.phone === phone);
+  if(!existingCust) {
+    customersData.customers.push({
+      name: name,
+      phone: phone,
+      date: new Date().toLocaleDateString("ar-EG")
+    });
+    await saveCustomersToCloud();
+  }
+
   updateCustomerUI();
   closeCustomerPanel();
-  alert("تم حفظ بياناتك بنجاح ✅");
+  alert("تم تسجيل الدخول وحفظ بياناتك بنجاح ✅");
 });
 
 function customerLogout(){
-  if(!confirm("تسجيل الخروج؟"))return;
-  sessionStorage.setItem("mansouraLoggedOut","yes");
+  if(!confirm("Logout?")) return;
+  localStorage.removeItem("mansouraCustomer");
   updateCustomerUI();
   document.getElementById("menu").style.display="none";
 }
@@ -491,66 +698,71 @@ function toggleMenu(){
   menu.style.display=menu.style.display==="block"?"none":"block";
 }
 
-function adminLogin(){
-  const pass=prompt("ادخل باسورد المبرمج");
-  if(pass===ADMIN_PASSWORD){
-    document.getElementById("adminPanel").style.display="block";
-    document.getElementById("menu").style.display="none";
-    updateDashboard();
-  }else if(pass!==null){
-    alert("الباسورد غير صحيح");
-  }
-}
+function closeAdmin(){ document.getElementById("adminPanel").style.display="none"; }
 
-function closeAdmin(){
-  document.getElementById("adminPanel").style.display="none";
-}
-
-/* عرض المنتجات */
 function renderProducts(){
   const box=document.getElementById("products");
   box.innerHTML="";
 
   const searchText = document.getElementById("search").value.toLowerCase();
-  const productsList = dbData.products || [];
+  let productsList = [...(dbData.products || [])];
 
-  const filtered = productsList.filter(p=>{
+  productsList = productsList.filter(p=>{
     const matchesCat = (currentCategory === "الكل" || p.category === currentCategory);
     const matchesSearch = (p.name.toLowerCase().includes(searchText) || p.shop.toLowerCase().includes(searchText));
     return matchesCat && matchesSearch;
   });
 
-  if(!filtered.length){
-    box.innerHTML='<p class="empty">لا توجد منتجات مطابقة في هذا القسم</p>';
+  if(sortByPriceAsc) {
+    productsList.sort((a, b) => Number(a.price) - Number(b.price));
+  }
+
+  if(!productsList.length){
+    box.innerHTML=`<p class="empty">${currentLang==='ar'?'لا توجد منتجات مطابقة':'No matching products'}</p>`;
     updateDashboard();
     return;
   }
 
-  filtered.forEach(p=>{
+  const t = translations[currentLang];
+  productsList.forEach(p=>{
     const card=document.createElement("div");
     card.className="card";
+    card.onclick = () => openProductModal(p.id);
 
     const img=document.createElement("img");
     img.src=p.image||"https://via.placeholder.com/400x300?text=Product";
-    img.alt=p.name;
     img.onerror=()=>img.src="https://via.placeholder.com/400x300?text=Product";
 
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "card-content";
+
     const h=document.createElement("h2");
+    h.style.fontSize = "18px"; h.style.margin = "0 0 5px 0";
     h.textContent=p.name;
 
-    const s=document.createElement("p");
-    s.className="shop";
-    s.textContent="محل "+p.shop;
-    s.onclick = () => openShopsModal();
+    const shopRow = document.createElement("div");
+    shopRow.className = "shop-row";
+    
+    const shopSpan = document.createElement("span");
+    shopSpan.className = "shop";
+    shopSpan.textContent = "محل " + p.shop;
+
+    const mapBtn = document.createElement("button");
+    mapBtn.className = "map-btn-small";
+    mapBtn.textContent = t.mapBtn;
+    mapBtn.onclick = (e) => openShopMapDirect(p.id, e);
+
+    shopRow.append(shopSpan, mapBtn);
 
     const sizes = document.createElement("div");
-    sizes.innerHTML = `<span class="sizes-badge">المقاسات: ${escapeHTML(p.sizes || "متاح")}</span>`;
+    sizes.innerHTML = `<span class="sizes-badge">${t.sizesLabel}${escapeHTML(p.sizes || "متاح")}</span>`;
 
     const price=document.createElement("p");
     price.className="price";
-    price.textContent=Number(p.price).toLocaleString("ar-EG")+" جنيه";
+    price.textContent=Number(p.price).toLocaleString("ar-EG") + t.priceUnit;
 
-    card.append(img,h,s,sizes,price);
+    contentDiv.append(h, shopRow, sizes, price);
+    card.append(img, contentDiv);
     box.append(card);
   });
 
@@ -559,108 +771,90 @@ function renderProducts(){
 
 document.getElementById("search").addEventListener("input",renderProducts);
 
-/* إضافة منتج */
 document.getElementById("addForm").addEventListener("submit",async function(e){
   e.preventDefault();
-
   const shop=document.getElementById("shopName").value.trim();
   const name=document.getElementById("productName").value.trim();
   const category=document.getElementById("productCategory").value;
   const sizes=document.getElementById("productSizes").value.trim();
   const price=Number(document.getElementById("productPrice").value);
   const image=document.getElementById("productImage").value.trim();
+  const mapUrl=document.getElementById("productMapUrl").value.trim();
 
-  if(!shop||!name||!sizes||!Number.isFinite(price)||price<=0){
-    alert("من فضلك أدخل البيانات بشكل صحيح");
-    return;
-  }
+  if(!shop||!name||!sizes||!Number.isFinite(price)||price<=0) return;
 
   if(!dbData.products) dbData.products = [];
-
-  dbData.products.push({
-    id:Date.now(),
-    shop,
-    name,
-    category,
-    sizes,
-    price,
-    image:image||"https://via.placeholder.com/400x300?text=Product"
-  });
-
-  const saved = await saveDataToCloud();
-  if(saved) {
-    this.reset();
-    alert("تمت إضافة المنتج بنجاح للجميع ✅");
-  }
+  dbData.products.push({ id:Date.now(), shop, name, category, sizes, price, image:image||"https://via.placeholder.com/400x300?text=Product", mapUrl:mapUrl||"" });
+  if(await saveProductsToCloud()) { this.reset(); alert("Added successfully ✅"); }
 });
 
-/* تعديل المنتج */
 async function editProduct(id){
   const p=dbData.products.find(x=>x.id===id);
   if(!p)return;
+  let name=prompt("Name:",p.name); if(name===null)return;
+  let mapUrl=prompt("Map URL:",p.mapUrl||""); if(mapUrl===null)return;
+  let sizes=prompt("Sizes:",p.sizes); if(sizes===null)return;
+  let price=prompt("Price:",p.price); if(price===null)return;
+  let image=prompt("Image URL:",p.image); if(image===null)return;
 
-  let name=prompt("تعديل اسم المنتج:",p.name);
-  if(name===null)return;
-
-  let sizes=prompt("تعديل المقاسات:",p.sizes);
-  if(sizes===null)return;
-
-  let price=prompt("تعديل السعر:",p.price);
-  if(price===null)return;
-
-  let image=prompt("تعديل رابط الصورة:",p.image);
-  if(image===null)return;
-
-  p.name=name.trim();
-  p.sizes=sizes.trim();
-  p.price=Number(price);
-  p.image=image.trim()||p.image;
-
-  const saved = await saveDataToCloud();
-  if(saved) alert("تم تعديل المنتج بنجاح ✅");
+  p.name=name.trim(); p.mapUrl=mapUrl.trim(); p.sizes=sizes.trim(); p.price=Number(price); p.image=image.trim()||p.image;
+  if(await saveProductsToCloud()) alert("Updated successfully ✅");
 }
 
-/* حذف المنتج */
 async function deleteProduct(id){
-  if(!confirm("هل أنت متأكد من حذف المنتج؟"))return;
-
+  if(!confirm("Delete product?"))return;
   dbData.products = dbData.products.filter(p=>p.id!==id);
-
-  const saved = await saveDataToCloud();
-  if(saved) alert("تم الحذف بنجاح ✅");
+  if(await saveProductsToCloud()) alert("Deleted successfully ✅");
 }
 
-/* تحديث لوحة التحكم */
 function updateDashboard(){
   const prods = dbData.products || [];
+  const shops = dbData.shops || [];
+  const customers = customersData.customers || [];
+
   document.getElementById("totalProducts").textContent = prods.length;
-  document.getElementById("totalShops").textContent = (dbData.shops || []).length;
-  document.getElementById("lowestPrice").textContent = (prods.length ? Math.min(...prods.map(p=>Number(p.price))) : 0) + " ج";
+  document.getElementById("totalShops").textContent = shops.length;
+  document.getElementById("totalCustomers").textContent = customers.length;
+
+  // جدول العملاء المستقل في لوحة التحكم
+  const custTbody = document.getElementById("adminCustomers");
+  custTbody.innerHTML = "";
+  if(!customers.length) {
+    custTbody.innerHTML = '<tr><td colspan="4" class="empty">لا توجد عملاء مسجلين حتى الآن</td></tr>';
+  } else {
+    customers.forEach((c, index) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHTML(c.name)}</td>
+        <td><a href="tel:${escapeHTML(c.phone)}" style="color:#2563eb;font-weight:bold">${escapeHTML(c.phone)}</a></td>
+        <td>${escapeHTML(c.date || "حديث")}</td>
+        <td><button class="delete-btn" onclick="deleteCustomer(${index})">حذف</button></td>
+      `;
+      custTbody.append(tr);
+    });
+  }
+
+  const shopsTbody = document.getElementById("adminShops");
+  shopsTbody.innerHTML = "";
+  shops.forEach((sh, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHTML(sh.name)}</td><td>${escapeHTML(sh.address)}</td><td><a href="${sh.mapUrl}" target="_blank">Map</a></td><td><button class="edit-btn" onclick="editShop(${index})">Edit</button></td><td><button class="delete-btn" onclick="deleteShop(${index})">Del</button></td>`;
+    shopsTbody.append(tr);
+  });
 
   const tbody=document.getElementById("adminProducts");
   tbody.innerHTML="";
-
-  if(!prods.length){
-    tbody.innerHTML='<tr><td colspan="6" class="empty">لا توجد منتجات حتى الآن</td></tr>';
-    return;
-  }
-
+  if(!prods.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">No products</td></tr>'; return; }
   prods.forEach(p=>{
     const tr=document.createElement("tr");
-    tr.innerHTML=`
-    <td>${escapeHTML(p.name)}</td>
-    <td>${escapeHTML(p.category || "أخرى")}</td>
-    <td>${escapeHTML(p.shop)}</td>
-    <td>${Number(p.price)} ج</td>
-    <td><button class="edit-btn" onclick="editProduct(${p.id})">تعديل</button></td>
-    <td><button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button></td>
-    `;
+    tr.innerHTML=`<td>${escapeHTML(p.name)}</td><td>${escapeHTML(p.category)}</td><td>${escapeHTML(p.shop)}</td><td>${Number(p.price)} ج</td><td><button class="edit-btn" onclick="editProduct(${p.id})">Edit</button></td><td><button class="delete-btn" onclick="deleteProduct(${p.id})">Del</button></td>`;
     tbody.append(tr);
   });
 }
 
-// تشغيل الموقع
-loadData();
+// تحميل البيانات من الجدولين المستقلين عند فتح الموقع
+loadProductsData();
+loadCustomersData();
 updateCustomerUI();
 </script>
 </body>
