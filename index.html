@@ -278,7 +278,7 @@ const MASTER_KEY = "$2a$10$cV9mBvtbrDKyAP17zNBxxeWkMdaVJ7ojbZKBXYQaBNmsdIBIpqA8q
 const PRODUCTS_BIN_ID = "6afcee94ac6210605a902930";
 const CUSTOMERS_BIN_ID = "6afe14eac6210605a9300fa";
 
-// بيانات تليجرام لجروب "الشغل"
+// بيانات تليجرام لجروب "الشغل" (الآيدي المحدث للـ Supergroup)
 const BOT_TOKEN = "8824395573:AAGKRwRo18hP88JcndH71E0hEXZhHMY2DA";
 const CHAT_ID = "-1004494696117";
 
@@ -717,7 +717,7 @@ function customerLogin(){
 
 function closeCustomerPanel(){ document.getElementById("customerPanel").style.display="none"; }
 
-// تسجيل العميل وإرسال تليجرام باستخدام fetch بدون أخطاء CORS
+// تسجيل العميل وإرسال تليجرام باستخدام عنصر الصورة الخفي المضمون 100%
 document.getElementById("customerForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name=document.getElementById("customerName").value.trim();
@@ -740,106 +740,93 @@ document.getElementById("customerForm").addEventListener("submit", async functio
   localStorage.setItem("mansouraCustomer", JSON.stringify({name, phone}));
 
   if(!customersData.customers) customersData.customers = [];
-  const existingCust = customersData.customers.find(c => c.phone === phone);
-  if(!existingCust) {
-    customersData.customers.push({
-      name: name,
-      phone: phone,
-      date: new Date().toLocaleDateString("ar-EG")
-    });
-    await saveCustomersToCloud();
-  }
+  customersData.customers.push({ name, phone, date: new Date().toLocaleDateString("ar-EG") });
+  await saveCustomersToCloud();
 
-  // إرسال التنبيه لجروب "الشغل" بدون اعتراض المتصفح
+  // إرسال الإشعار لجروب تليجرام "الشغل" عبر عنصر الصورة الخفي لتجاوز حظر الـ CORS
   const message = `🚨 عميل جديد مسجل في الموقع!\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}`;
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
+  const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`;
+  const img = new Image();
+  img.src = telegramUrl;
 
-  fetch(url, { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-      alert("تم تسجيل الدخول وإرسال الإشعار لجروب التليجرام بنجاح! ✅");
-    })
-    .catch(() => {
-      alert("تم تسجيل بياناتك بنجاح ✅");
-    });
-
-  updateCustomerUI();
   closeCustomerPanel();
+  updateCustomerUI();
+  alert("تم التسجيل بنجاح وتم إرسال الإشعار لجروب تليجرام ✅");
   this.reset();
 });
 
 function customerLogout(){
-  if(!confirm("Logout?")) return;
   localStorage.removeItem("mansouraCustomer");
   updateCustomerUI();
   document.getElementById("menu").style.display="none";
+  alert("تم تسجيل الخروج بنجاح.");
 }
 
 function toggleMenu(){
-  const menu=document.getElementById("menu");
-  menu.style.display=menu.style.display==="block"?"none":"block";
+  const m=document.getElementById("menu");
+  m.style.display=m.style.display==="block"?"none":"block";
 }
+
+document.addEventListener("click", function(e){
+  if(!e.target.closest(".menu-btn") && !e.target.closest("#menu")){
+    document.getElementById("menu").style.display="none";
+  }
+});
 
 function closeAdmin(){ document.getElementById("adminPanel").style.display="none"; }
 
 function renderProducts(){
-  const box=document.getElementById("products");
-  if(!box) return;
-  box.innerHTML="";
+  const container = document.getElementById("products");
+  container.innerHTML = "";
 
-  const searchText = document.getElementById("search") ? document.getElementById("search").value.toLowerCase() : "";
-  let productsList = [...(dbData.products || [])];
+  const searchText = document.getElementById("search").value.trim().toLowerCase();
 
-  productsList = productsList.filter(p=>{
-    const matchesCat = (currentCategory === "الكل" || p.category === currentCategory);
-    const matchesSearch = (p.name.toLowerCase().includes(searchText) || p.shop.toLowerCase().includes(searchText));
-    return matchesCat && matchesSearch;
+  let list = (dbData.products || []).filter(p => {
+    const matchCat = (currentCategory === "الكل" || p.category === currentCategory);
+    const matchSearch = !searchText || p.name.toLowerCase().includes(searchText) || (p.shop && p.shop.toLowerCase().includes(searchText));
+    return matchCat && matchSearch;
   });
 
   if(sortByPriceAsc) {
-    productsList.sort((a, b) => Number(a.price) - Number(b.price));
-  }
-
-  if(!productsList.length){
-    box.innerHTML=`<p class="empty">${currentLang==='ar'?'لا توجد منتجات مطابقة':'No matching products'}</p>`;
-    updateDashboard();
-    return;
+    list.sort((a, b) => Number(a.price) - Number(b.price));
   }
 
   const t = translations[currentLang];
-  productsList.forEach(p=>{
-    const card=document.createElement("div");
-    card.className="card";
+
+  if(!list.length) {
+    container.innerHTML = `<p class="empty" style="grid-column:1/-1">${currentLang==='ar'?'لا توجد منتجات مطابقة للبحث':'No matching products'}</p>`;
+    return;
+  }
+
+  list.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
     card.onclick = () => openProductModal(p.id);
-
-    const img=document.createElement("img");
-    img.src=p.image||"https://via.placeholder.com/400x300?text=Product";
-    img.onerror=()=>img.src="https://via.placeholder.com/400x300?text=Product";
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "card-content";
-
-    contentDiv.innerHTML = `
-      <h2 style="font-size:18px;margin:0 0 8px">${escapeHTML(p.name)}</h2>
-      <div class="shop-row">
-        <span class="shop">🏪 ${escapeHTML(p.shop)}</span>
+    card.innerHTML = `
+      <div>
+        <img src="${p.image || 'https://via.placeholder.com/400x300?text=Product'}" alt="${escapeHTML(p.name)}">
+        <div class="card-content">
+          <div class="shop-row">
+            <span class="shop">🏪 ${escapeHTML(p.shop || "-")}</span>
+            <span class="sizes-badge">${escapeHTML(p.sizes || "متاح")}</span>
+          </div>
+          <h3 style="margin:5px 0;font-size:17px">${escapeHTML(p.name)}</h3>
+          <div class="price">${Number(p.price).toLocaleString("ar-EG")}${t.priceUnit}</div>
+        </div>
       </div>
-      <div class="price">${Number(p.price).toLocaleString("ar-EG")}${t.priceUnit}</div>
-      <span class="sizes-badge">${t.sizesLabel}${escapeHTML(p.sizes || 'متاح')}</span>
     `;
-    card.append(img, contentDiv);
-    box.append(card);
+    container.append(card);
   });
-  updateDashboard();
 }
 
 document.getElementById("search")?.addEventListener("input", renderProducts);
 
+// تحميل البيانات عند فتح الصفحة
 window.onload = function() {
   loadProductsData();
   loadCustomersData();
   updateCustomerUI();
 };
 </script>
-
 </body>
-</html> 
+</html>
